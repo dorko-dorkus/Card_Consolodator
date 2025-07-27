@@ -3,6 +3,7 @@ import os
 import re
 import stripe
 from flask import Blueprint, request, jsonify
+from flask_limiter.errors import RateLimitExceeded
 from flask_login import login_user, logout_user, current_user, login_required
 from .__init__ import bcrypt, csrf
 from datetime import datetime
@@ -82,6 +83,10 @@ api_bp = Blueprint("api", __name__)
 
 @api_bp.errorhandler(Exception)
 def handle_exception(error):
+    from flask import current_app
+    if isinstance(error, RateLimitExceeded):
+        return jsonify({"error": "Rate limit exceeded"}), 429
+    current_app.logger.exception("Unhandled exception")
     db.session.rollback()
     return jsonify({"error": "Server error"}), 500
 

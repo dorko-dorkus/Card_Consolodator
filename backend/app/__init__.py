@@ -1,12 +1,17 @@
 from cryptography.fernet import Fernet
 import os
 import stripe
+import logging
+import sys
+from logging.handlers import RotatingFileHandler
 from flask import Flask
 from flask_wtf import CSRFProtect
 from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
 from flask_login import LoginManager
 from flask_cors import CORS
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 from .config import Config
 
 # Initialize Flask extensions
@@ -19,6 +24,7 @@ login_manager = LoginManager()
 login_manager.session_protection = "strong"
 login_manager.login_view = "api.login"
 csrf = CSRFProtect()
+limiter = Limiter(key_func=get_remote_address)
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -40,21 +46,34 @@ def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)
 
+    # Configure logging to stdout or a file
+    log_file = os.getenv("LOG_FILE")
+    log_level = os.getenv("LOG_LEVEL", "INFO").upper()
+    handler = RotatingFileHandler(log_file, maxBytes=1048576, backupCount=1) if log_file else logging.StreamHandler(sys.stdout)
+    handler.setFormatter(logging.Formatter("%(asctime)s %(levelname)s: %(message)s [in %(pathname)s:%(lineno)d]"))
+    app.logger.setLevel(log_level)
+    app.logger.handlers = [handler]
+
     # Configure CORS origins from environment or configuration
     allowed_origins = os.getenv("CORS_ORIGINS", Config.CORS_ORIGINS)
     origins_list = [o.strip() for o in allowed_origins.split(',')] if allowed_origins else "*"
     CORS(app, origins=origins_list, supports_credentials=True)
 
     # Disable CSRF in testing environments
-    import sys
     if 'pytest' in sys.modules:
         app.config['WTF_CSRF_ENABLED'] = False
+
+    # Update rate limit from environment at runtime
+    app.config['RATELIMIT_DEFAULT'] = os.getenv('RATE_LIMIT', app.config.get('RATELIMIT_DEFAULT', '100/hour'))
 
     # Initialize extensions with the Flask app
     db.init_app(app)
     bcrypt.init_app(app)
     login_manager.init_app(app)
     csrf.init_app(app)
+    app.config.setdefault('RATELIMIT_HEADERS_ENABLED', True)
+    limiter.default_limits = [app.config['RATELIMIT_DEFAULT']]
+    limiter.init_app(app)
 
     with app.app_context():
         from . import models  # ensure models are registered for migrations

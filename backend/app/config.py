@@ -29,3 +29,6 @@ class Config:
 
     # Comma-separated list of origins allowed to access the API
     CORS_ORIGINS = os.environ.get('CORS_ORIGINS', '*')
+
+    # Global rate limit for the API, used by Flask-Limiter
+    RATE_LIMIT = os.environ.get('RATE_LIMIT', '100/hour')
