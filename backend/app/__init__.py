@@ -34,6 +34,9 @@ def create_app():
     bcrypt.init_app(app)
     login_manager.init_app(app)
 
+    with app.app_context():
+        from . import models  # ensure models are registered for migrations
+
     # Register application blueprints (routes)
     from .routes import api_bp
     from .webhooks import webhooks_bp

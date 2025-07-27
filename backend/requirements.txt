@@ -7,3 +7,5 @@ cryptography
 stripe
 pytest
 pytest-mock
+Flask-Migrate
+alembic
