@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify
 import stripe
 import os
-from models import db, PlatformGiftCard, User
+from .models import db, PlatformGiftCard, User
 
 webhooks_bp = Blueprint('webhooks', __name__)
 STRIPE_WEBHOOK_SECRET = os.getenv("STRIPE_WEBHOOK_SECRET")

@@ -2,7 +2,7 @@ from datetime import datetime
 from sqlalchemy import Column, Integer, String, Float, ForeignKey, DateTime, Boolean
 from sqlalchemy.orm import relationship, declarative_base
 from flask_login import UserMixin
-from app.__init__ import db
+from .__init__ import db
 
 Base = declarative_base()
 
