@@ -124,6 +124,16 @@ The server uses [Flask-CORS](https://flask-cors.readthedocs.io/) to allow
 cross-origin requests. Set the `CORS_ORIGINS` environment variable to a
 comma-separated list of allowed origins (defaults to `*`).
 
+### Logging and rate limiting
+
+The API configures Python logging to write to STDOUT by default. Set a `LOG_FILE`
+environment variable if you prefer writing logs to a file. Unexpected errors are
+logged with full stack traces.
+
+All routes are protected by [Flask-Limiter](https://flask-limiter.readthedocs.io/)
+with a default limit of `100/hour` per IP. Adjust this by setting the
+`RATE_LIMIT` environment variable, e.g. `RATE_LIMIT=10/minute`.
+
 Your `DATABASE_URL` should use a standard SQLAlchemy connection string. For example:
 
 * **Postgres**: `postgresql://user:password@hostname:5432/dbname`
