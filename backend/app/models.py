@@ -15,6 +15,10 @@ class User(db.Model, UserMixin):
     platform_cards = db.relationship("PlatformGiftCard", back_populates="user")
     transactions = db.relationship("Transaction", back_populates="user")
 
+    def get_id(self):
+        """Return the user identifier for Flask-Login sessions."""
+        return str(self.user_id)
+
 class GiftCard(db.Model):
     __tablename__ = 'gift_cards'
     card_id = db.Column(db.Integer, primary_key=True, autoincrement=True)

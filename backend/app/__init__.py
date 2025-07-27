@@ -14,6 +14,14 @@ db = SQLAlchemy()
 bcrypt = Bcrypt()
 # LoginManager for handling user authentication
 login_manager = LoginManager()
+login_manager.session_protection = "strong"
+login_manager.login_view = "api.login"
+
+@login_manager.user_loader
+def load_user(user_id):
+    """Flask-Login user loader callback."""
+    from .models import User
+    return User.query.get(int(user_id))
 
 # Load Stripe secret key, falling back to the value defined in Config
 STRIPE_SECRET_KEY = os.getenv("STRIPE_SECRET_KEY", Config.STRIPE_SECRET_KEY)
