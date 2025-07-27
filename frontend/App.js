@@ -20,7 +20,10 @@ const App = () => {
 
   useEffect(() => {
     (async () => {
-      let key = await getItem(STRIPE_KEY_STORAGE);
+      let key = process.env.STRIPE_PUBLISHABLE_KEY;
+      if (!key) {
+        key = await getItem(STRIPE_KEY_STORAGE);
+      }
       if (!key) {
         // Default publishable key used for development/testing
         key = "your-publishable-key";

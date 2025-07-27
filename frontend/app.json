@@ -37,6 +37,9 @@
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "stripePublishableKey": "${STRIPE_PUBLISHABLE_KEY}"
     }
   }
 }
