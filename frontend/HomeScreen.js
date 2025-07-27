@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, Button, FlatList } from "react-native";
-import { fetchGiftCards, consolidateGiftCards } from "../api/api";
+import { fetchGiftCards, consolidateGiftCards } from "./api";
 
 const HomeScreen = ({ navigation }) => {
   const [giftCards, setGiftCards] = useState([]);
