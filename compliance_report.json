@@ -7,13 +7,13 @@
       "details": [
         {
           "file": "README.md",
-          "snippet": "  \"card_number\": \"123456789012\"",
-          "comment": "Documentation shows raw card numbers being sent to the backend via the gift card API."
+          "snippet": "  \"card_token\": \"tok_123456\"",
+          "comment": "Documentation now shows a PSP token being sent to the backend via the gift card API."
         },
         {
           "file": "backend/app/routes.py",
-          "snippet": "card_number = data.get(\"card_number\")",
-          "comment": "Backend route expects plain card numbers instead of PSP tokens."
+          "snippet": "card_token = data.get(\"card_token\")",
+          "comment": "Backend route now expects a PSP token instead of a raw card number."
         }
       ]
     },
@@ -54,7 +54,7 @@
         {
           "file": "backend/app/models.py",
           "snippet": "class GiftCard(db.Model):",
-          "comment": "Database stores card_number, balance and other financial data."
+          "comment": "Database stores a PSP token, balance and other financial data."
         },
         {
           "file": "backend/app/models.py",

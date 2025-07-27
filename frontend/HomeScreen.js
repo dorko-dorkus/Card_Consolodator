@@ -29,7 +29,7 @@ const HomeScreen = ({ navigation }) => {
         keyExtractor={(item) => item.card_id.toString()}
         renderItem={({ item }) => (
           <View style={[styles.cardItem, {backgroundColor: theme === "light" ? "#fff" : "#1e1e1e"}] }>
-            <ThemedText>Card Number: {item.card_number}</ThemedText>
+            <ThemedText>Token: {item.card_token}</ThemedText>
             <ThemedText>Balance: ${item.balance.toFixed(2)}</ThemedText>
           </View>
         )}
