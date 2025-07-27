@@ -293,3 +293,14 @@ run_installer.bat
 ```
 
 The script installs Python packages, builds `backend/run.py` into `backend/dist/run.exe` using PyInstaller and installs the frontend npm packages. After completion, you can execute the generated `run.exe` to start the Flask API.
+
+## Unix installer
+
+For Linux or macOS users, a small wrapper script is provided. Run:
+
+```bash
+./run_installer.sh
+```
+
+This invokes `installer.py` using Python 3 to install all dependencies and build
+the backend executable.
