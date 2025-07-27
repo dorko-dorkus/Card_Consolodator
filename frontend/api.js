@@ -2,6 +2,7 @@
 // Defaults to a local development server if not provided.
 const API_BASE = process.env.BACKEND_URL || "http://localhost:5000";
 const API_URL = `${API_BASE}/api`;
+import { tokenize } from "./tokenizer";
 
 export const fetchGiftCards = async (userId) => {
   try {
@@ -35,7 +36,7 @@ export const linkBankAccount = async (userId, bankToken) => {
     const response = await fetch(`${API_URL}/bank-accounts/link`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ user_id: userId, bank_token: bankToken }),
+      body: JSON.stringify({ user_id: userId, bank_token: tokenize(bankToken) }),
       credentials: 'include',
     });
     return await response.json();
@@ -50,7 +51,7 @@ export const transferFromBank = async (userId, accountId, amount) => {
     const response = await fetch(`${API_URL}/bank-accounts/transfer`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ user_id: userId, account_id: accountId, amount }),
+      body: JSON.stringify({ user_id: userId, account_id: tokenize(accountId), amount }),
       credentials: 'include',
     });
     return await response.json();

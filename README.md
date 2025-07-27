@@ -54,6 +54,11 @@ credentials out of the codebase and adds a layer of security. You can also
 provide a `STRIPE_PUBLISHABLE_KEY` environment variable when starting the app;
 the value will be used before falling back to the stored credentials.
 
+All payment flows additionally use a small client-side tokenization helper
+(`tokenizer.js`) which hashes sensitive values before they are sent to the
+backend. This ensures the server only receives opaque tokens and never raw
+payment details.
+
 ### Building Android and iOS releases
 
 1. Install the EAS CLI and log in:
