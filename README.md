@@ -40,6 +40,12 @@ npm run reset-project
 
 This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
 
+### Secure credentials
+
+The Expo application stores the Stripe publishable key and recent payment tokens
+using `expo-secure-store`. Storing these values in the device keychain keeps
+credentials out of the codebase and adds a layer of security.
+
 ## Get started (backend)
 
 ```bash
