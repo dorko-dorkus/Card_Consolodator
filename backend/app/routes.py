@@ -8,7 +8,7 @@ from .__init__ import bcrypt
 from datetime import datetime
 from .config import Config
 
-from .models import db, GiftCard, PlatformGiftCard, User
+from .models import db, GiftCard, PlatformGiftCard, User, Transaction, BankAccount
 
 # Load encryption key from environment variable or file
 ENCRYPTION_KEY_PATH = os.getenv("ENCRYPTION_KEY_PATH", "encryption_key.key")
@@ -236,3 +236,105 @@ def consolidate_cards():
         client_secret = None
 
     return jsonify({"message": "Consolidation complete", "client_secret": client_secret})
+
+
+@api_bp.route("/bank-accounts/link", methods=["POST"])
+def link_bank_account():
+    """Link a user's bank account via Stripe ACH."""
+    data = request.get_json() or {}
+    user_id = data.get("user_id")
+    bank_token = data.get("bank_token")
+
+    if not all([user_id, bank_token]):
+        return jsonify({"error": "user_id and bank_token required"}), 400
+
+    user = User.query.get(user_id)
+    if not user:
+        return jsonify({"error": "User not found"}), 404
+
+    if not user.stripe_customer_id:
+        try:
+            customer = stripe.Customer.create(email=user.email, name=user.name)
+            user.stripe_customer_id = customer.id
+            db.session.commit()
+        except stripe.error.StripeError as e:
+            return jsonify({"error": str(e)}), 400
+
+    try:
+        bank_account = stripe.Customer.create_source(
+            user.stripe_customer_id,
+            source=bank_token,
+        )
+    except stripe.error.StripeError as e:
+        return jsonify({"error": str(e)}), 400
+
+    new_account = BankAccount(
+        user_id=user_id,
+        stripe_bank_account_id=bank_account.id,
+        bank_name=getattr(bank_account, "bank_name", None) or getattr(bank_account, "bank_name", None),
+        last4=getattr(bank_account, "last4", None),
+    )
+    db.session.add(new_account)
+    db.session.commit()
+
+    return jsonify({"message": "bank account linked", "account_id": new_account.account_id})
+
+
+@api_bp.route("/bank-accounts/transfer", methods=["POST"])
+def bank_account_transfer():
+    """Initiate a transfer from a linked bank account and update balance."""
+    data = request.get_json() or {}
+    user_id = data.get("user_id")
+    account_id = data.get("account_id")
+    amount = data.get("amount")
+
+    if not all([user_id, account_id, amount]):
+        return jsonify({"error": "Missing required fields"}), 400
+
+    try:
+        amount = float(amount)
+    except (TypeError, ValueError):
+        return jsonify({"error": "Invalid amount"}), 400
+
+    user = User.query.get(user_id)
+    if not user:
+        return jsonify({"error": "User not found"}), 404
+
+    bank_account = BankAccount.query.filter_by(account_id=account_id, user_id=user_id).first()
+    if not bank_account:
+        return jsonify({"error": "Bank account not found"}), 404
+
+    try:
+        intent = stripe.PaymentIntent.create(
+            amount=int(amount * 100),
+            currency="usd",
+            customer=user.stripe_customer_id,
+            payment_method=bank_account.stripe_bank_account_id,
+            payment_method_types=["us_bank_account"],
+            confirm=True,
+        )
+    except stripe.error.StripeError as e:
+        return jsonify({"error": str(e)}), 400
+
+    platform_card = PlatformGiftCard.query.filter_by(user_id=user_id).first()
+    if not platform_card:
+        platform_card = PlatformGiftCard(user_id=user_id, balance=0)
+        db.session.add(platform_card)
+
+    platform_card.balance += amount
+
+    transaction = Transaction(
+        user_id=user_id,
+        transaction_type="Deposit",
+        amount=amount,
+        details_encrypted=encrypt_data(f"Bank transfer {bank_account.last4}"),
+        stripe_payment_id=intent.id,
+    )
+    db.session.add(transaction)
+    db.session.commit()
+
+    return jsonify({
+        "message": "transfer successful",
+        "transaction_id": transaction.transaction_id,
+        "new_balance": platform_card.balance,
+    })
