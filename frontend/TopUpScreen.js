@@ -1,11 +1,16 @@
 import React, { useState } from "react";
-import { View, Text, TextInput, Button } from "react-native";
+import { View, TextInput, Button, StyleSheet } from "react-native";
 import { transferFromBank } from "./api";
+import { ThemedText } from "./ThemedText";
+import { useColorScheme } from "./hooks/useColorScheme";
+import { Colors } from "./constants/Colors";
 
 const TopUpScreen = () => {
   const [accountId, setAccountId] = useState("");
   const [amount, setAmount] = useState("");
   const [message, setMessage] = useState("");
+  const theme = useColorScheme() ?? "light";
+  const tint = Colors[theme].tint;
 
   const handleTransfer = async () => {
     const result = await transferFromBank(1, accountId, parseFloat(amount));
@@ -17,25 +22,47 @@ const TopUpScreen = () => {
   };
 
   return (
-    <View style={{ flex: 1, padding: 20 }}>
-      <Text style={{ fontSize: 24, fontWeight: "bold" }}>Top Up Balance</Text>
+    <View style={[styles.container, { backgroundColor: Colors[theme].background }] }>
+      <ThemedText style={styles.title}>Top Up Balance</ThemedText>
       <TextInput
         placeholder="Bank Account ID"
         value={accountId}
         onChangeText={setAccountId}
-        style={{ borderWidth: 1, padding: 8, marginVertical: 10 }}
+        style={styles.input}
       />
       <TextInput
         placeholder="Amount"
         value={amount}
         onChangeText={setAmount}
         keyboardType="numeric"
-        style={{ borderWidth: 1, padding: 8, marginVertical: 10 }}
+        style={styles.input}
       />
-      <Button title="Transfer" onPress={handleTransfer} />
-      {message ? <Text style={{ marginTop: 20 }}>{message}</Text> : null}
+      <Button color={tint} title="Transfer" onPress={handleTransfer} />
+      {message ? <ThemedText style={styles.message}>{message}</ThemedText> : null}
     </View>
   );
 };
 
 export default TopUpScreen;
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    padding: 20,
+    justifyContent: "center",
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: "bold",
+    marginBottom: 20,
+  },
+  input: {
+    borderWidth: 1,
+    padding: 8,
+    marginVertical: 10,
+    borderRadius: 6,
+  },
+  message: {
+    marginTop: 20,
+  },
+});

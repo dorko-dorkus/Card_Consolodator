@@ -1,11 +1,16 @@
 import React, { useState } from "react";
-import { View, Text, Button, ActivityIndicator } from "react-native";
+import { View, Button, ActivityIndicator, StyleSheet } from "react-native";
 import { consolidateGiftCards } from "./api";
+import { ThemedText } from "./ThemedText";
+import { useColorScheme } from "./hooks/useColorScheme";
+import { Colors } from "./constants/Colors";
 
 
 const ConsolidationScreen = ({ navigation }) => {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
+  const theme = useColorScheme() ?? "light";
+  const tint = Colors[theme].tint;
 
   const handleConsolidation = async () => {
     setLoading(true);
@@ -17,14 +22,31 @@ const ConsolidationScreen = ({ navigation }) => {
   };
 
   return (
-    <View style={{ flex: 1, padding: 20, alignItems: "center" }}>
-      <Text style={{ fontSize: 24, fontWeight: "bold" }}>Consolidate Gift Cards</Text>
-      {loading ? <ActivityIndicator size="large" color="#0000ff" /> : null}
-      {message ? <Text style={{ marginTop: 20 }}>{message}</Text> : null}
-      <Button title="Consolidate Now" onPress={handleConsolidation} />
-      <Button title="Go Back" onPress={() => navigation.goBack()} />
+    <View style={[styles.container, { backgroundColor: Colors[theme].background }]}>
+      <ThemedText style={styles.title}>Consolidate Gift Cards</ThemedText>
+      {loading ? <ActivityIndicator size="large" color={tint} /> : null}
+      {message ? <ThemedText style={styles.message}>{message}</ThemedText> : null}
+      <Button color={tint} title="Consolidate Now" onPress={handleConsolidation} />
+      <Button color={tint} title="Go Back" onPress={() => navigation.goBack()} />
     </View>
   );
 };
 
 export default ConsolidationScreen;
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    padding: 20,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: "bold",
+    marginBottom: 20,
+  },
+  message: {
+    marginTop: 20,
+  },
+});

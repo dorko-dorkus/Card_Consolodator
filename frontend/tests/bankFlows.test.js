@@ -8,6 +8,8 @@ jest.mock('react-native', () => {
     Text: (props) => React.createElement('Text', props, props.children),
     TextInput: (props) => React.createElement('TextInput', props),
     Button: (props) => React.createElement('Button', props),
+    StyleSheet: { create: (styles) => styles },
+    useColorScheme: () => 'light',
   };
 });
 import BankAccountScreen from '../BankAccountScreen';
