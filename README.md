@@ -212,7 +212,10 @@ Join our community of developers creating universal apps.
 ## Deployment
 
 Create a `backend/.env` file before running the API in production. Copy the
-example file and replace each placeholder with your real credentials:
+example file and replace each placeholder with your real credentials.  The
+application uses PostgreSQL in production, so set `DATABASE_URL` to the
+connection string for your Postgres instance (for example
+`postgresql://user:password@localhost:5432/consolidator`):
 
 ```bash
 cp backend/.env.example backend/.env
@@ -225,6 +228,15 @@ cp backend/.env.example backend/.env
 #   JWT_SECRET_KEY
 #   ENCRYPTION_KEY
 #   CORS_ORIGINS
+```
+
+After creating the environment file, apply the migrations to set up the
+database schema:
+
+```bash
+cd backend
+export FLASK_APP=manage.py
+flask db upgrade
 ```
 
 When deploying with Docker Compose or `docker run`, pass this file using the

@@ -15,7 +15,7 @@ def upgrade():
         sa.Column('name', sa.String(), nullable=False),
         sa.Column('email', sa.String(), nullable=False, unique=True),
         sa.Column('password_hash', sa.String(), nullable=False),
-        sa.Column('is_verified', sa.Boolean(), nullable=True, server_default=sa.text('0')),
+        sa.Column('is_verified', sa.Boolean(), nullable=True, server_default=sa.text('false')),
         sa.Column('stripe_customer_id', sa.String(), nullable=True, unique=True),
     )
     op.create_table(
@@ -25,7 +25,7 @@ def upgrade():
         sa.Column('card_number', sa.String(), nullable=False, unique=True),
         sa.Column('balance', sa.Float(), nullable=False),
         sa.Column('expiry_date', sa.DateTime(), nullable=False),
-        sa.Column('is_active', sa.Boolean(), nullable=True, server_default=sa.text('1')),
+        sa.Column('is_active', sa.Boolean(), nullable=True, server_default=sa.text('true')),
         sa.Column('source', sa.String(), nullable=False),
     )
     op.create_table(
