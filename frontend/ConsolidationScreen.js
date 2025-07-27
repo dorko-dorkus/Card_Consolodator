@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { View, Text, Button, ActivityIndicator } from "react-native";
-import { consolidateGiftCards } from "../api/api";
+import { consolidateGiftCards } from "./api";
 
 
 const ConsolidationScreen = ({ navigation }) => {
