@@ -1,12 +1,22 @@
 import React from "react";
 import { View, Button, Text } from "react-native";
 import { useStripe } from "@stripe/stripe-react-native";
+import { saveItem, getItem } from "./SecureStore";
 
 const PaymentScreen = () => {
   const { presentGooglePay } = useStripe();
 
+  React.useEffect(() => {
+    (async () => {
+      const method = await getItem("last_payment_method");
+      if (method) {
+        console.log("Last payment method:", method);
+      }
+    })();
+  }, []);
+
   const handleGooglePay = async () => {
-    const { error } = await presentGooglePay({
+    const { error, paymentMethod } = await presentGooglePay({
       currencyCode: "USD",
       amount: 1000, // $10.00
     });
@@ -14,6 +24,9 @@ const PaymentScreen = () => {
       console.log("Payment failed:", error);
     } else {
       console.log("Payment successful!");
+      if (paymentMethod?.id) {
+        await saveItem("last_payment_method", paymentMethod.id);
+      }
     }
   };
 
