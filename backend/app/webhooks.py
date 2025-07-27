@@ -33,7 +33,7 @@ def stripe_webhook():
         user_id = int(payment_intent['metadata']['user_id'])
         amount = payment_intent['amount_received'] / 100
         
-        user = User.query.get(user_id)
+        user = db.session.get(User, user_id)
         if not user:
             return jsonify({"error": "User not found"}), 400
         

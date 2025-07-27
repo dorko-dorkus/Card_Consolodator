@@ -281,7 +281,7 @@ def link_bank_account():
     if not all([user_id, bank_token]):
         return jsonify({"error": "user_id and bank_token required"}), 400
 
-    user = User.query.get(user_id)
+    user = db.session.get(User, user_id)
     if not user:
         return jsonify({"error": "User not found"}), 404
 
@@ -334,7 +334,7 @@ def bank_account_transfer():
     except (TypeError, ValueError):
         return jsonify({"error": "Invalid amount"}), 400
 
-    user = User.query.get(user_id)
+    user = db.session.get(User, user_id)
     if not user:
         return jsonify({"error": "User not found"}), 404
 
