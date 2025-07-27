@@ -292,7 +292,7 @@ A helper script is provided to build an executable version of the backend and in
 run_installer.bat
 ```
 
-The script installs Python packages, builds `backend/run.py` into `backend/dist/run.exe` using PyInstaller and installs the frontend npm packages. After completion, you can execute the generated `run.exe` to start the Flask API.
+The script installs Python packages, builds `backend/run.py` into `backend/dist/run.exe` using PyInstaller and installs the frontend npm packages. If `backend/.env` does not exist it is copied from `backend/.env.example`, and the installer will prompt you for any missing environment variable values.
 
 ## Unix installer
 
