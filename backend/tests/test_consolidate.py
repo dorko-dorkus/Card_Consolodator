@@ -38,6 +38,7 @@ def test_consolidate_cards(mocker):
     app = setup_app()
     user_id = create_user_with_cards(app)
     client = app.test_client()
+    client.post('/api/login', json={'email': 'u@example.com', 'password': 'pw'})
 
     mocker.patch('app.routes.stripe.PaymentIntent.create', return_value=type('obj',(object,),{'client_secret':'secret'})())
 
@@ -54,3 +55,13 @@ def test_consolidate_cards(mocker):
         cards = GiftCard.query.filter_by(user_id=user_id).all()
         assert all(card.balance == 0 for card in cards)
         assert all(card.is_active is False for card in cards)
+
+
+def test_consolidate_requires_login(mocker):
+    app = setup_app()
+    user_id = create_user_with_cards(app)
+    client = app.test_client()
+    mocker.patch('app.routes.stripe.PaymentIntent.create', return_value=type('obj',(object,),{'client_secret':'secret'})())
+    resp = client.post('/api/consolidate', json={'user_id': user_id})
+    assert resp.status_code == 302
+

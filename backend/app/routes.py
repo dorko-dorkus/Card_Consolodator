@@ -155,6 +155,7 @@ def session_info():
 
 
 @api_bp.route("/gift-cards", methods=["GET"])
+@login_required
 def get_gift_cards():
     """Return all gift cards for the specified user."""
     user_id = request.args.get("user_id", type=int)
@@ -178,6 +179,7 @@ def get_gift_cards():
 
 
 @api_bp.route("/gift-cards", methods=["POST"])
+@login_required
 def add_gift_card():
     """Add a new gift card for a user."""
     data = request.get_json() or {}
@@ -225,6 +227,7 @@ def add_gift_card():
 
 
 @api_bp.route("/consolidate", methods=["POST"])
+@login_required
 def consolidate_cards():
     """Consolidate all active gift cards into the user's platform card."""
     data = request.get_json() or {}
@@ -268,6 +271,7 @@ def consolidate_cards():
 
 
 @api_bp.route("/bank-accounts/link", methods=["POST"])
+@login_required
 def link_bank_account():
     """Link a user's bank account via Stripe ACH."""
     data = request.get_json() or {}
@@ -314,6 +318,7 @@ def link_bank_account():
 
 
 @api_bp.route("/bank-accounts/transfer", methods=["POST"])
+@login_required
 def bank_account_transfer():
     """Initiate a transfer from a linked bank account and update balance."""
     data = request.get_json() or {}
@@ -379,6 +384,7 @@ def bank_account_transfer():
 
 
 @api_bp.route("/purchase", methods=["POST"])
+@login_required
 def make_purchase():
     """Charge a user's consolidated balance toward a purchase."""
     data = request.get_json() or {}
