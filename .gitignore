@@ -40,3 +40,4 @@ app-example
 
 # backend archives
 backend/*.zip
+backend/encryption_key.key

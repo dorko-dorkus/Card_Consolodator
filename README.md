@@ -120,6 +120,10 @@ cp backend/.env.example backend/.env
 # then edit backend/.env and add your real credentials
 ```
 
+Make sure to define an `ENCRYPTION_KEY` in this file or in your environment. The
+example file `backend/.env.example` shows the variable name. This key is used to
+encrypt sensitive data stored by the API.
+
 The server uses [Flask-CORS](https://flask-cors.readthedocs.io/) to allow
 cross-origin requests. Set the `CORS_ORIGINS` environment variable to a
 comma-separated list of allowed origins (defaults to `*`).
