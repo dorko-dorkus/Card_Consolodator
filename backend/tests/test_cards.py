@@ -29,6 +29,7 @@ def test_add_gift_card_success():
     app = setup_app()
     user_id = create_user(app)
     client = app.test_client()
+    client.post('/api/login', json={'email': 'u@example.com', 'password': 'pw'})
 
     resp = client.post('/api/gift-cards', json={
         'user_id': user_id,
@@ -51,6 +52,7 @@ def test_add_gift_card_expired():
     app = setup_app()
     user_id = create_user(app)
     client = app.test_client()
+    client.post('/api/login', json={'email': 'u@example.com', 'password': 'pw'})
 
     resp = client.post('/api/gift-cards', json={
         'user_id': user_id,
@@ -60,3 +62,12 @@ def test_add_gift_card_expired():
     })
     assert resp.status_code == 400
     assert 'error' in resp.get_json()
+
+
+def test_get_cards_requires_login():
+    app = setup_app()
+    user_id = create_user(app)
+    client = app.test_client()
+    resp = client.get(f'/api/gift-cards?user_id={user_id}')
+    assert resp.status_code == 302
+

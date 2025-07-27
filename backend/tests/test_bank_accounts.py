@@ -31,6 +31,7 @@ def test_link_bank_account(mocker):
     app = setup_app()
     user_id = create_user(app)
     client = app.test_client()
+    client.post('/api/login', json={'email': 'u@example.com', 'password': 'pw'})
 
     mocker.patch("app.routes.stripe.Customer.create", return_value=type('obj', (object,), {'id': 'cus_123'})())
     mocker.patch("app.routes.stripe.Customer.create_source", return_value=type('obj', (object,), {'id': 'ba_123', 'bank_name': 'Bank', 'last4': '1234'})())
@@ -50,6 +51,7 @@ def test_bank_account_transfer(mocker):
     app = setup_app()
     user_id = create_user(app, with_customer=True)
     client = app.test_client()
+    client.post('/api/login', json={'email': 'u@example.com', 'password': 'pw'})
 
     with app.app_context():
         account = BankAccount(user_id=user_id, stripe_bank_account_id='ba_123', bank_name='Bank', last4='1234')
@@ -72,3 +74,30 @@ def test_bank_account_transfer(mocker):
         assert len(txns) == 1
         assert txns[0].stripe_payment_id == 'pi_123'
         assert txns[0].amount == 15
+
+
+def test_bank_account_transfer_requires_login(mocker):
+    app = setup_app()
+    user_id = create_user(app, with_customer=True)
+    client = app.test_client()
+    with app.app_context():
+        account = BankAccount(user_id=user_id, stripe_bank_account_id='ba_123', bank_name='Bank', last4='1234')
+        db.session.add(account)
+        db.session.add(PlatformGiftCard(user_id=user_id, balance=0))
+        db.session.commit()
+        account_id = account.account_id
+    mocker.patch("app.routes.stripe.PaymentIntent.create", return_value=type('obj', (object,), {'id': 'pi_123'})())
+    resp = client.post('/api/bank-accounts/transfer', json={'user_id': user_id, 'account_id': account_id, 'amount': 15})
+    assert resp.status_code == 302
+
+
+def test_link_bank_account_requires_login(mocker):
+    app = setup_app()
+    user_id = create_user(app)
+    client = app.test_client()
+    mocker.patch("app.routes.stripe.Customer.create", return_value=type('obj', (object,), {'id': 'cus_123'})())
+    mocker.patch("app.routes.stripe.Customer.create_source", return_value=type('obj', (object,), {'id': 'ba_123', 'bank_name': 'Bank', 'last4': '1234'})())
+    resp = client.post('/api/bank-accounts/link', json={'user_id': user_id, 'bank_token': 'tok_bank'})
+    assert resp.status_code == 302
+
+

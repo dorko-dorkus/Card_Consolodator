@@ -31,6 +31,7 @@ def test_unhandled_exception_returns_500(mocker):
     app = setup_app()
     user_id = create_user(app)
     client = app.test_client()
+    client.post('/api/login', json={'email': 'u@example.com', 'password': 'pw'})
 
     with app.app_context():
         from datetime import datetime

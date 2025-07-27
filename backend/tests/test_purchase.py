@@ -28,6 +28,7 @@ def test_purchase_success(mocker):
     app = setup_app()
     user_id = create_user(app)
     client = app.test_client()
+    client.post('/api/login', json={'email': 'u@example.com', 'password': 'pw'})
 
     with app.app_context():
         card = PlatformGiftCard(user_id=user_id, balance=20, stripe_card_id="pm_123")
@@ -54,6 +55,7 @@ def test_purchase_insufficient_balance():
     app = setup_app()
     user_id = create_user(app)
     client = app.test_client()
+    client.post('/api/login', json={'email': 'u@example.com', 'password': 'pw'})
 
     with app.app_context():
         card = PlatformGiftCard(user_id=user_id, balance=5)
@@ -63,4 +65,17 @@ def test_purchase_insufficient_balance():
     resp = client.post('/api/purchase', json={'user_id': user_id, 'amount': 10})
     assert resp.status_code == 400
     assert 'error' in resp.get_json()
+
+
+def test_purchase_requires_login():
+    app = setup_app()
+    user_id = create_user(app)
+    client = app.test_client()
+    with app.app_context():
+        card = PlatformGiftCard(user_id=user_id, balance=5)
+        db.session.add(card)
+        db.session.commit()
+    resp = client.post('/api/purchase', json={'user_id': user_id, 'amount': 3})
+    assert resp.status_code == 302
+
 
