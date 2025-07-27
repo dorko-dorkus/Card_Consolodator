@@ -1,4 +1,7 @@
-const API_URL = "http://your-backend-url/api";
+// Allow the backend base URL to be configured via environment variable.
+// Defaults to a local development server if not provided.
+const API_BASE = process.env.BACKEND_URL || "http://localhost:5000";
+const API_URL = `${API_BASE}/api`;
 
 export const fetchGiftCards = async (userId) => {
   try {

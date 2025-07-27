@@ -1,9 +1,13 @@
 import stripe
 import os
+from .config import Config
 
-# Load Stripe API keys from environment variables
-STRIPE_SECRET_KEY = os.getenv("STRIPE_SECRET_KEY")
-STRIPE_PUBLIC_KEY = os.getenv("STRIPE_PUBLIC_KEY")
+# Load Stripe API keys from environment variables with config fallbacks
+STRIPE_SECRET_KEY = os.getenv("STRIPE_SECRET_KEY", Config.STRIPE_SECRET_KEY)
+# Use STRIPE_PUBLISHABLE_KEY for consistency with the config and .env file
+STRIPE_PUBLIC_KEY = os.getenv(
+    "STRIPE_PUBLISHABLE_KEY", Config.STRIPE_PUBLISHABLE_KEY
+)
 stripe.api_key = STRIPE_SECRET_KEY
 
 def create_payment_intent(amount, user_id):

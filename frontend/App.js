@@ -19,7 +19,8 @@ const App = () => {
     (async () => {
       let key = await getItem(STRIPE_KEY_STORAGE);
       if (!key) {
-        key = "your-publishable-key"; // fallback for development
+        // Default publishable key used for development/testing
+        key = "your-publishable-key";
         await saveItem(STRIPE_KEY_STORAGE, key);
       }
       setPublishableKey(key);

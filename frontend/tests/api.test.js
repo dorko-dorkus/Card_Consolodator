@@ -1,3 +1,4 @@
+process.env.BACKEND_URL = 'http://your-backend-url';
 const {fetchGiftCards, consolidateGiftCards} = require('../api');
 
 global.fetch = jest.fn();

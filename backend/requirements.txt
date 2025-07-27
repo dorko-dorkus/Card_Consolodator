@@ -6,3 +6,4 @@ python-dotenv
 cryptography
 stripe
 pytest
+pytest-mock
