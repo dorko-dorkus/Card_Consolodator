@@ -1,4 +1,5 @@
 from flask import Blueprint, request, jsonify
+from .__init__ import csrf
 import stripe
 import os
 from .models import db, PlatformGiftCard, User
@@ -8,6 +9,7 @@ webhooks_bp = Blueprint('webhooks', __name__)
 STRIPE_WEBHOOK_SECRET = os.getenv("STRIPE_WEBHOOK_SECRET", Config.STRIPE_WEBHOOK_SECRET)
 stripe.api_key = os.getenv("STRIPE_SECRET_KEY", Config.STRIPE_SECRET_KEY)
 
+@csrf.exempt
 @webhooks_bp.route('/stripe/webhook', methods=['POST'])
 def stripe_webhook():
     """Handles Stripe webhook events and updates the system accordingly."""
@@ -23,6 +25,8 @@ def stripe_webhook():
         return jsonify({"error": "Invalid payload"}), 400
     except stripe.error.SignatureVerificationError:
         return jsonify({"error": "Invalid signature"}), 400
+    except Exception:
+        return jsonify({"error": "Webhook error"}), 400
     
     if event['type'] == 'payment_intent.succeeded':
         payment_intent = event['data']['object']
@@ -47,5 +51,7 @@ def stripe_webhook():
     elif event['type'] == 'issuing_card.created':
         card = event['data']['object']
         print(f"New virtual card issued: {card['id']}")
-    
+    else:
+        print(f"Unhandled event type: {event['type']}")
+
     return jsonify({"status": "success"}), 200

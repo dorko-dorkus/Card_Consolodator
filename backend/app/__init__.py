@@ -2,6 +2,7 @@ from cryptography.fernet import Fernet
 import os
 import stripe
 from flask import Flask
+from flask_wtf import CSRFProtect
 from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
 from flask_login import LoginManager
@@ -16,6 +17,7 @@ bcrypt = Bcrypt()
 login_manager = LoginManager()
 login_manager.session_protection = "strong"
 login_manager.login_view = "api.login"
+csrf = CSRFProtect()
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -37,10 +39,16 @@ def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)
 
+    # Disable CSRF in testing environments
+    import sys
+    if 'pytest' in sys.modules:
+        app.config['WTF_CSRF_ENABLED'] = False
+
     # Initialize extensions with the Flask app
     db.init_app(app)
     bcrypt.init_app(app)
     login_manager.init_app(app)
+    csrf.init_app(app)
 
     with app.app_context():
         from . import models  # ensure models are registered for migrations
@@ -51,5 +59,12 @@ def create_app():
 
     app.register_blueprint(api_bp, url_prefix='/api')
     app.register_blueprint(webhooks_bp, url_prefix='/api')
+
+    @app.after_request
+    def set_csrf_cookie(response):
+        if app.config.get('WTF_CSRF_ENABLED', True):
+            from flask_wtf.csrf import generate_csrf
+            response.set_cookie('csrf_token', generate_csrf())
+        return response
 
     return app
