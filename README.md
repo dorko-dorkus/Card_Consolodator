@@ -54,6 +54,54 @@ credentials out of the codebase and adds a layer of security. You can also
 provide a `STRIPE_PUBLISHABLE_KEY` environment variable when starting the app;
 the value will be used before falling back to the stored credentials.
 
+### Building Android and iOS releases
+
+1. Install the EAS CLI and log in:
+
+   ```bash
+   npm install -g eas-cli
+   eas login
+   ```
+
+2. Configure your signing credentials. Expo can manage them for you:
+
+   ```bash
+   eas build:configure --platform android
+   eas build:configure --platform ios
+   ```
+
+   Follow the prompts to generate or provide keystores, certificates and provisioning profiles.
+
+3. Run a production build:
+
+   ```bash
+   # Android
+   eas build --platform android
+
+   # iOS
+   eas build --platform ios
+   ```
+
+   The legacy `expo build:android` and `expo build:ios` commands also work if you prefer.
+
+4. Provide environment variables such as `STRIPE_PUBLISHABLE_KEY` and `BACKEND_URL` when
+   building. You can define them in an `eas.json` profile or pass them on the command line:
+
+   ```json
+   {
+     "build": {
+       "production": {
+         "env": {
+           "STRIPE_PUBLISHABLE_KEY": "pk_live_your_key",
+           "BACKEND_URL": "https://api.example.com"
+         }
+       }
+     }
+   }
+   ```
+
+   Running `eas build --profile production` will then inject these values at build time.
+
 ## Get started (backend)
 
 ```bash
