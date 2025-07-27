@@ -1,4 +1,4 @@
-import { Colors, ColorScheme } from '@/constants/Colors';
+import { Colors, ColorScheme } from '../constants/Colors';
 import { useColorScheme } from './useColorScheme';
 
 type ThemeProps = {

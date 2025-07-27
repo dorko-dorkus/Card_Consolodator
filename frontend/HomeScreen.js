@@ -1,9 +1,14 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, Button, FlatList } from "react-native";
+import { View, Button, FlatList, StyleSheet } from "react-native";
 import { fetchGiftCards } from "./api";
+import { ThemedText } from "./ThemedText";
+import { useColorScheme } from "./hooks/useColorScheme";
+import { Colors } from "./constants/Colors";
 
 const HomeScreen = ({ navigation }) => {
   const [giftCards, setGiftCards] = useState([]);
+  const theme = useColorScheme() ?? "light";
+  const tint = Colors[theme].tint;
 
   useEffect(() => {
     const loadGiftCards = async () => {
@@ -14,24 +19,45 @@ const HomeScreen = ({ navigation }) => {
   }, []);
 
   return (
-    <View style={{ flex: 1, padding: 20 }}>
-      <Text style={{ fontSize: 24, fontWeight: "bold" }}>Your Gift Cards</Text>
+    <View style={[styles.container, { backgroundColor: Colors[theme].background }]}>
+      <ThemedText style={styles.title}>Your Gift Cards</ThemedText>
       <FlatList
         data={giftCards}
         keyExtractor={(item) => item.card_id.toString()}
         renderItem={({ item }) => (
-          <View style={{ padding: 10, borderBottomWidth: 1 }}>
-            <Text>Card Number: {item.card_number}</Text>
-            <Text>Balance: ${item.balance.toFixed(2)}</Text>
+          <View style={[styles.cardItem, {backgroundColor: theme === "light" ? "#fff" : "#1e1e1e"}] }>
+            <ThemedText>Card Number: {item.card_number}</ThemedText>
+            <ThemedText>Balance: ${item.balance.toFixed(2)}</ThemedText>
           </View>
         )}
       />
-      <Button title="Consolidate" onPress={() => navigation.navigate("Consolidate")} />
-      <Button title="Bank Accounts" onPress={() => navigation.navigate("BankAccounts")} />
-      <Button title="Top Up" onPress={() => navigation.navigate("TopUp")} />
-      <Button title="Purchase" onPress={() => navigation.navigate("Purchase")} />
+      <Button color={tint} title="Consolidate" onPress={() => navigation.navigate("Consolidate")} />
+      <Button color={tint} title="Bank Accounts" onPress={() => navigation.navigate("BankAccounts")} />
+      <Button color={tint} title="Top Up" onPress={() => navigation.navigate("TopUp")} />
+      <Button color={tint} title="Purchase" onPress={() => navigation.navigate("Purchase")} />
     </View>
   );
 };
 
 export default HomeScreen;
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    padding: 20,
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: "bold",
+    marginBottom: 10,
+  },
+  cardItem: {
+    padding: 15,
+    borderRadius: 8,
+    marginBottom: 12,
+    shadowColor: "#000",
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+});
