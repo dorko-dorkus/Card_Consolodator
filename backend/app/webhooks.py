@@ -2,10 +2,11 @@ from flask import Blueprint, request, jsonify
 import stripe
 import os
 from .models import db, PlatformGiftCard, User
+from .config import Config
 
 webhooks_bp = Blueprint('webhooks', __name__)
-STRIPE_WEBHOOK_SECRET = os.getenv("STRIPE_WEBHOOK_SECRET")
-stripe.api_key = os.getenv("STRIPE_SECRET_KEY")
+STRIPE_WEBHOOK_SECRET = os.getenv("STRIPE_WEBHOOK_SECRET", Config.STRIPE_WEBHOOK_SECRET)
+stripe.api_key = os.getenv("STRIPE_SECRET_KEY", Config.STRIPE_SECRET_KEY)
 
 @webhooks_bp.route('/stripe/webhook', methods=['POST'])
 def stripe_webhook():

@@ -15,10 +15,10 @@ bcrypt = Bcrypt()
 # LoginManager for handling user authentication
 login_manager = LoginManager()
 
-# Load Stripe secret key from environment variables
-STRIPE_SECRET_KEY = os.getenv("STRIPE_SECRET_KEY")
+# Load Stripe secret key, falling back to the value defined in Config
+STRIPE_SECRET_KEY = os.getenv("STRIPE_SECRET_KEY", Config.STRIPE_SECRET_KEY)
 if not STRIPE_SECRET_KEY:
-    raise ValueError("Stripe Secret Key not set in environment variables")
+    raise ValueError("Stripe Secret Key not set in environment variables or configuration")
 # Set Stripe API key for payment processing
 stripe.api_key = STRIPE_SECRET_KEY
 
