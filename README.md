@@ -59,7 +59,10 @@ the value will be used before falling back to the stored credentials.
 ```bash
 cd backend
 pip install -r requirements.txt
+# For development
 python run.py
+# For production
+gunicorn wsgi:app
 ```
 
 Before starting the server, create a `.env` file for your local secrets:
