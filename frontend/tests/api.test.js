@@ -10,7 +10,7 @@ afterEach(() => {
 test('fetchGiftCards makes request to correct URL', async () => {
   fetch.mockResolvedValue({json: () => Promise.resolve([{card_id:1}])});
   const data = await fetchGiftCards(1);
-  expect(fetch).toHaveBeenCalledWith('http://your-backend-url/api/gift-cards?user_id=1');
+  expect(fetch).toHaveBeenCalledWith('http://your-backend-url/api/gift-cards?user_id=1', { credentials: 'include' });
   expect(data).toEqual([{card_id:1}]);
 });
 
@@ -21,6 +21,7 @@ test('consolidateGiftCards posts data', async () => {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ user_id: 2 }),
+    credentials: 'include',
   });
   expect(data).toEqual({message:'ok'});
 });
@@ -32,6 +33,7 @@ test('linkBankAccount posts data', async () => {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ user_id: 1, bank_token: 'tok_bank' }),
+    credentials: 'include',
   });
   expect(data).toEqual({message:'linked'});
 });
@@ -43,6 +45,7 @@ test('transferFromBank posts data', async () => {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ user_id: 1, account_id: 2, amount: 10 }),
+    credentials: 'include',
   });
   expect(data).toEqual({new_balance:10});
 });
@@ -54,6 +57,7 @@ test('makePurchase posts data', async () => {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ user_id: 1, amount: 5 }),
+    credentials: 'include',
   });
   expect(data).toEqual({remaining_balance:5});
 });

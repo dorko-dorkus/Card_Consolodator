@@ -1,5 +1,5 @@
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
 import HomeScreen from "./HomeScreen";
@@ -8,12 +8,42 @@ import PaymentScreen from "./PaymentScreen";
 import BankAccountScreen from "./BankAccountScreen";
 import TopUpScreen from "./TopUpScreen";
 import PurchaseScreen from "./PurchaseScreen";
+import LoginScreen from "./LoginScreen";
+import RegisterScreen from "./RegisterScreen";
 import { StripeProvider } from "@stripe/stripe-react-native";
 import { getItem, saveItem } from "./SecureStore";
-
-const Stack = createStackNavigator();
+import { AuthProvider, AuthContext } from "./AuthContext";
 
 const STRIPE_KEY_STORAGE = "stripe_publishable_key";
+
+const AppNavigator = () => {
+  const { user, loading } = useContext(AuthContext);
+  const Stack = createStackNavigator();
+
+  if (loading) return null;
+
+  return (
+    <NavigationContainer>
+      <Stack.Navigator initialRouteName={user ? 'Home' : 'Login'}>
+        {user ? (
+          <>
+            <Stack.Screen name="Home" component={HomeScreen} />
+            <Stack.Screen name="Consolidate" component={ConsolidationScreen} />
+            <Stack.Screen name="Checkout" component={PaymentScreen} />
+            <Stack.Screen name="BankAccounts" component={BankAccountScreen} />
+            <Stack.Screen name="TopUp" component={TopUpScreen} />
+            <Stack.Screen name="Purchase" component={PurchaseScreen} />
+          </>
+        ) : (
+          <>
+            <Stack.Screen name="Login" component={LoginScreen} />
+            <Stack.Screen name="Register" component={RegisterScreen} />
+          </>
+        )}
+      </Stack.Navigator>
+    </NavigationContainer>
+  );
+};
 
 const App = () => {
   const [publishableKey, setPublishableKey] = useState(null);
@@ -39,16 +69,9 @@ const App = () => {
 
   return (
     <StripeProvider publishableKey={publishableKey}>
-      <NavigationContainer>
-        <Stack.Navigator initialRouteName="Home">
-          <Stack.Screen name="Home" component={HomeScreen} />
-          <Stack.Screen name="Consolidate" component={ConsolidationScreen} />
-          <Stack.Screen name="Checkout" component={PaymentScreen} />
-          <Stack.Screen name="BankAccounts" component={BankAccountScreen} />
-          <Stack.Screen name="TopUp" component={TopUpScreen} />
-          <Stack.Screen name="Purchase" component={PurchaseScreen} />
-        </Stack.Navigator>
-      </NavigationContainer>
+      <AuthProvider>
+        <AppNavigator />
+      </AuthProvider>
     </StripeProvider>
   );
 };

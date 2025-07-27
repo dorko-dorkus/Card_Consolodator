@@ -1,22 +1,25 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import { View, Button, FlatList, StyleSheet } from "react-native";
 import { fetchGiftCards } from "./api";
 import { ThemedText } from "./ThemedText";
 import { useColorScheme } from "./hooks/useColorScheme";
 import { Colors } from "./constants/Colors";
+import { AuthContext } from "./AuthContext";
 
 const HomeScreen = ({ navigation }) => {
+  const { user } = useContext(AuthContext);
   const [giftCards, setGiftCards] = useState([]);
   const theme = useColorScheme() ?? "light";
   const tint = Colors[theme].tint;
 
   useEffect(() => {
     const loadGiftCards = async () => {
-      const data = await fetchGiftCards(1); // Assume user_id = 1
+      if (!user) return;
+      const data = await fetchGiftCards(user.user_id);
       setGiftCards(data);
     };
     loadGiftCards();
-  }, []);
+  }, [user]);
 
   return (
     <View style={[styles.container, { backgroundColor: Colors[theme].background }]}>

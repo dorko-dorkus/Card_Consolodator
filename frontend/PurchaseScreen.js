@@ -1,18 +1,21 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import { View, TextInput, Button, StyleSheet } from "react-native";
 import { makePurchase } from "./api";
 import { ThemedText } from "./ThemedText";
 import { useColorScheme } from "./hooks/useColorScheme";
 import { Colors } from "./constants/Colors";
+import { AuthContext } from "./AuthContext";
 
 const PurchaseScreen = () => {
+  const { user } = useContext(AuthContext);
   const [amount, setAmount] = useState("");
   const [message, setMessage] = useState("");
   const theme = useColorScheme() ?? "light";
   const tint = Colors[theme].tint;
 
   const handlePurchase = async () => {
-    const result = await makePurchase(1, parseFloat(amount));
+    if (!user) return;
+    const result = await makePurchase(user.user_id, parseFloat(amount));
     if (result?.remaining_balance !== undefined) {
       setMessage(`Remaining balance: $${result.remaining_balance}`);
     } else if (result?.error) {

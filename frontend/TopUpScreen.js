@@ -1,11 +1,13 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import { View, TextInput, Button, StyleSheet } from "react-native";
 import { transferFromBank } from "./api";
 import { ThemedText } from "./ThemedText";
 import { useColorScheme } from "./hooks/useColorScheme";
 import { Colors } from "./constants/Colors";
+import { AuthContext } from "./AuthContext";
 
 const TopUpScreen = () => {
+  const { user } = useContext(AuthContext);
   const [accountId, setAccountId] = useState("");
   const [amount, setAmount] = useState("");
   const [message, setMessage] = useState("");
@@ -13,7 +15,8 @@ const TopUpScreen = () => {
   const tint = Colors[theme].tint;
 
   const handleTransfer = async () => {
-    const result = await transferFromBank(1, accountId, parseFloat(amount));
+    if (!user) return;
+    const result = await transferFromBank(user.user_id, accountId, parseFloat(amount));
     if (result?.new_balance !== undefined) {
       setMessage(`New balance: $${result.new_balance}`);
     } else if (result?.error) {
