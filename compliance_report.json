@@ -1,0 +1,96 @@
+{
+  "checks": [
+    {
+      "id": 1,
+      "name": "PCI DSS SAQ A Scope",
+      "status": "failed",
+      "details": [
+        {
+          "file": "README.md",
+          "snippet": "  \"card_number\": \"123456789012\"",
+          "comment": "Documentation shows raw card numbers being sent to the backend via the gift card API."
+        },
+        {
+          "file": "backend/app/routes.py",
+          "snippet": "card_number = data.get(\"card_number\")",
+          "comment": "Backend route expects plain card numbers instead of PSP tokens."
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "name": "No Stored-Value or Top-Up",
+      "status": "failed",
+      "details": [
+        {
+          "file": "frontend/TopUpScreen.js",
+          "snippet": "const handleTransfer = async () => {",
+          "comment": "Client-side top-up screen transfers funds from a bank account."
+        },
+        {
+          "file": "backend/app/routes.py",
+          "snippet": "@api_bp.route(\"/bank-accounts/transfer\", methods=[\"POST\"])",
+          "comment": "Backend endpoint credits a balance via bank transfer."
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "name": "Split-Tender and PSP Integration",
+      "status": "failed",
+      "details": [
+        {
+          "file": "backend/app/routes.py",
+          "snippet": "intent = stripe.PaymentIntent.create(",
+          "comment": "Single PaymentIntent used; no separate calls for split-tender processing."
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "name": "Minimal Personal Data Collection",
+      "status": "failed",
+      "details": [
+        {
+          "file": "backend/app/models.py",
+          "snippet": "class GiftCard(db.Model):",
+          "comment": "Database stores card_number, balance and other financial data."
+        },
+        {
+          "file": "backend/app/models.py",
+          "snippet": "class Transaction(db.Model):",
+          "comment": "Transaction amounts and details are persisted."
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "name": "Privacy Law Artifacts",
+      "status": "failed",
+      "details": [
+        {
+          "file": "(repository root)",
+          "snippet": "find . -name '*privacy*' -print -> (no results)",
+          "comment": "No privacy policy document found."
+        },
+        {
+          "file": "(repository root)",
+          "snippet": "find . -name '*breach*' -print -> (no results)",
+          "comment": "No breach response plan present."
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "name": "Compliance Documentation",
+      "status": "failed",
+      "details": [
+        {
+          "file": "(repository root)",
+          "snippet": "find . -type d -name 'compliance' -> (no results)",
+          "comment": "Required compliance directory with SAQ A materials is missing."
+        }
+      ]
+    }
+  ]
+}
