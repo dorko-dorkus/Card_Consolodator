@@ -54,6 +54,13 @@ pip install -r requirements.txt
 python run.py
 ```
 
+Before starting the server, create a `.env` file for your local secrets:
+
+```bash
+cp backend/.env.example backend/.env
+# then edit backend/.env and add your real credentials
+```
+
 ### Gift card management endpoints
 
 You can add physical or imported gift cards to a user's account using the
