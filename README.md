@@ -69,6 +69,25 @@ cp backend/.env.example backend/.env
 # then edit backend/.env and add your real credentials
 ```
 
+Your `DATABASE_URL` should use a standard SQLAlchemy connection string. For example:
+
+* **Postgres**: `postgresql://user:password@hostname:5432/dbname`
+* **MySQL**: `mysql+pymysql://user:password@hostname:3306/dbname`
+
+## Database migrations
+
+Flask-Migrate commands are available through `manage.py`. To create or apply
+migrations run:
+
+```bash
+cd backend
+export FLASK_APP=manage.py
+flask db upgrade  # apply existing migrations
+```
+
+Use `flask db migrate -m "Message"` to generate new migration scripts when your
+models change.
+
 ### Gift card management endpoints
 
 You can add physical or imported gift cards to a user's account using the

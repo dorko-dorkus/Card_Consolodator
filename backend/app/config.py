@@ -2,8 +2,16 @@
 import os
 
 class Config:
-    SECRET_KEY = os.environ.get('SECRET_KEY') or 'your_secret_key_here'
-    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL', 'sqlite:///site.db')
+    SECRET_KEY = os.environ.get("SECRET_KEY") or "your_secret_key_here"
+
+    env = os.getenv("FLASK_ENV", "production")
+    if env == "development":
+        SQLALCHEMY_DATABASE_URI = os.environ.get("DATABASE_URL", "sqlite:///site.db")
+    else:
+        SQLALCHEMY_DATABASE_URI = os.environ.get("DATABASE_URL")
+        if not SQLALCHEMY_DATABASE_URI:
+            raise RuntimeError("DATABASE_URL must be set for non-development environments")
+
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
     # Stripe Configuration
