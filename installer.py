@@ -5,8 +5,21 @@ import os
 PYTHON = sys.executable
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
-BACKEND_DIR = os.path.join(ROOT, 'backend')
-FRONTEND_DIR = os.path.join(ROOT, 'frontend')
+BACKEND_DIR = os.path.join(ROOT, "backend")
+FRONTEND_DIR = os.path.join(ROOT, "frontend")
+
+
+def ensure_backend_env():
+    """Copy backend/.env.example to backend/.env if it doesn't exist."""
+    env_file = os.path.join(BACKEND_DIR, ".env")
+    example_file = os.path.join(BACKEND_DIR, ".env.example")
+    if not os.path.exists(env_file) and os.path.exists(example_file):
+        print(f"Creating default environment file: {env_file}")
+        import shutil
+
+        shutil.copy(example_file, env_file)
+        print("\nEdit this file to add your real API keys before running the app.\n")
+
 
 def run(cmd, cwd=None):
     print(f"Running: {' '.join(cmd)}")
@@ -14,23 +27,25 @@ def run(cmd, cwd=None):
 
 
 def install_backend():
-    req_file = os.path.join(BACKEND_DIR, 'requirements.txt')
-    run([PYTHON, '-m', 'pip', 'install', '--user', '-r', req_file])
+    req_file = os.path.join(BACKEND_DIR, "requirements.txt")
+    run([PYTHON, "-m", "pip", "install", "--user", "-r", req_file])
     # ensure pyinstaller is available
-    run([PYTHON, '-m', 'pip', 'install', '--user', 'pyinstaller'])
+    run([PYTHON, "-m", "pip", "install", "--user", "pyinstaller"])
     # build executable
-    run([PYTHON, '-m', 'PyInstaller', '--onefile', 'run.py'], cwd=BACKEND_DIR)
+    run([PYTHON, "-m", "PyInstaller", "--onefile", "run.py"], cwd=BACKEND_DIR)
 
 
 def install_frontend():
-    if os.path.exists(os.path.join(FRONTEND_DIR, 'package.json')):
-        run(['npm', 'install'], cwd=FRONTEND_DIR)
+    if os.path.exists(os.path.join(FRONTEND_DIR, "package.json")):
+        run(["npm", "install"], cwd=FRONTEND_DIR)
 
 
 def main():
+    ensure_backend_env()
     install_backend()
     install_frontend()
     print("Build complete. Backend executable is located in backend/dist/.")
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     main()
