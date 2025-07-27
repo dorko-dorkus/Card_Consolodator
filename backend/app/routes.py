@@ -4,7 +4,7 @@ import re
 import stripe
 from flask import Blueprint, request, jsonify
 from flask_login import login_user, logout_user, current_user, login_required
-from .__init__ import bcrypt
+from .__init__ import bcrypt, csrf
 from datetime import datetime
 from .config import Config
 
@@ -80,6 +80,15 @@ def validate_card_details(card_number: str, expiry_date: str):
 api_bp = Blueprint("api", __name__)
 
 
+@api_bp.errorhandler(Exception)
+def handle_exception(error):
+    db.session.rollback()
+    return jsonify({"error": "Server error"}), 500
+
+EMAIL_RE = re.compile(r"[^@]+@[^@]+\.[^@]+")
+
+
+@csrf.exempt
 @api_bp.route("/register", methods=["POST"])
 def register():
     """Register a new user and log them in."""
@@ -89,6 +98,10 @@ def register():
     password = data.get("password")
     if not all([name, email, password]):
         return jsonify({"error": "Missing required fields"}), 400
+    if not EMAIL_RE.fullmatch(email):
+        return jsonify({"error": "Invalid email"}), 400
+    if len(password) < 6:
+        return jsonify({"error": "Password too short"}), 400
 
     if User.query.filter_by(email=email).first():
         return jsonify({"error": "Email already registered"}), 409
@@ -101,6 +114,7 @@ def register():
     return jsonify({"message": "registered", "user_id": user.user_id})
 
 
+@csrf.exempt
 @api_bp.route("/login", methods=["POST"])
 def login():
     """Authenticate an existing user."""
@@ -109,6 +123,8 @@ def login():
     password = data.get("password")
     if not all([email, password]):
         return jsonify({"error": "Missing credentials"}), 400
+    if not EMAIL_RE.fullmatch(email):
+        return jsonify({"error": "Invalid email"}), 400
 
     user = User.query.filter_by(email=email).first()
     if user and bcrypt.check_password_hash(user.password_hash, password):
@@ -161,6 +177,10 @@ def add_gift_card():
     """Add a new gift card for a user."""
     data = request.get_json() or {}
     user_id = data.get("user_id")
+    try:
+        user_id = int(user_id)
+    except (TypeError, ValueError):
+        return jsonify({"error": "Invalid user_id"}), 400
     card_number = data.get("card_number")
     balance = data.get("balance")
     expiry = data.get("expiry_date")
@@ -204,6 +224,10 @@ def consolidate_cards():
     """Consolidate all active gift cards into the user's platform card."""
     data = request.get_json() or {}
     user_id = data.get("user_id")
+    try:
+        user_id = int(user_id)
+    except (TypeError, ValueError):
+        return jsonify({"error": "Invalid user_id"}), 400
     if not user_id:
         return jsonify({"error": "user_id required"}), 400
 
@@ -244,6 +268,10 @@ def link_bank_account():
     data = request.get_json() or {}
     user_id = data.get("user_id")
     bank_token = data.get("bank_token")
+    try:
+        user_id = int(user_id)
+    except (TypeError, ValueError):
+        return jsonify({"error": "Invalid user_id"}), 400
 
     if not all([user_id, bank_token]):
         return jsonify({"error": "user_id and bank_token required"}), 400
@@ -287,6 +315,11 @@ def bank_account_transfer():
     user_id = data.get("user_id")
     account_id = data.get("account_id")
     amount = data.get("amount")
+    try:
+        user_id = int(user_id)
+        account_id = int(account_id)
+    except (TypeError, ValueError):
+        return jsonify({"error": "Invalid user_id or account_id"}), 400
 
     if not all([user_id, account_id, amount]):
         return jsonify({"error": "Missing required fields"}), 400
@@ -346,6 +379,11 @@ def make_purchase():
     data = request.get_json() or {}
     user_id = data.get("user_id")
     amount = data.get("amount")
+
+    try:
+        user_id = int(user_id)
+    except (TypeError, ValueError):
+        return jsonify({"error": "Invalid user_id"}), 400
 
     if not all([user_id, amount]):
         return jsonify({"error": "Missing required fields"}), 400
