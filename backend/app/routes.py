@@ -2,6 +2,8 @@ from cryptography.fernet import Fernet
 import os
 import stripe
 from flask import Blueprint, request, jsonify
+from flask_login import login_user, logout_user, current_user, login_required
+from .__init__ import bcrypt
 from datetime import datetime
 from .config import Config
 
@@ -62,6 +64,59 @@ def verify_payment(payment_intent_id):
 
 # Blueprint exposing REST API endpoints
 api_bp = Blueprint("api", __name__)
+
+
+@api_bp.route("/register", methods=["POST"])
+def register():
+    """Register a new user and log them in."""
+    data = request.get_json() or {}
+    name = data.get("name")
+    email = data.get("email")
+    password = data.get("password")
+    if not all([name, email, password]):
+        return jsonify({"error": "Missing required fields"}), 400
+
+    if User.query.filter_by(email=email).first():
+        return jsonify({"error": "Email already registered"}), 409
+
+    hashed_pw = bcrypt.generate_password_hash(password).decode("utf-8")
+    user = User(name=name, email=email, password_hash=hashed_pw)
+    db.session.add(user)
+    db.session.commit()
+    login_user(user)
+    return jsonify({"message": "registered", "user_id": user.user_id})
+
+
+@api_bp.route("/login", methods=["POST"])
+def login():
+    """Authenticate an existing user."""
+    data = request.get_json() or {}
+    email = data.get("email")
+    password = data.get("password")
+    if not all([email, password]):
+        return jsonify({"error": "Missing credentials"}), 400
+
+    user = User.query.filter_by(email=email).first()
+    if user and bcrypt.check_password_hash(user.password_hash, password):
+        login_user(user)
+        return jsonify({"message": "logged in"})
+    return jsonify({"error": "Invalid credentials"}), 401
+
+
+@api_bp.route("/logout", methods=["POST"])
+@login_required
+def logout():
+    """Log out the current user."""
+    logout_user()
+    return jsonify({"message": "logged out"})
+
+
+@api_bp.route("/session", methods=["GET"])
+def session_info():
+    """Return session status for the current user."""
+    if current_user.is_authenticated:
+        return jsonify({"authenticated": True, "user_id": current_user.user_id})
+    return jsonify({"authenticated": False})
 
 
 @api_bp.route("/gift-cards", methods=["GET"])
