@@ -338,3 +338,54 @@ def bank_account_transfer():
         "transaction_id": transaction.transaction_id,
         "new_balance": platform_card.balance,
     })
+
+
+@api_bp.route("/purchase", methods=["POST"])
+def make_purchase():
+    """Charge a user's consolidated balance toward a purchase."""
+    data = request.get_json() or {}
+    user_id = data.get("user_id")
+    amount = data.get("amount")
+
+    if not all([user_id, amount]):
+        return jsonify({"error": "Missing required fields"}), 400
+
+    try:
+        amount = float(amount)
+    except (TypeError, ValueError):
+        return jsonify({"error": "Invalid amount"}), 400
+
+    platform_card = PlatformGiftCard.query.filter_by(user_id=user_id).first()
+    if not platform_card or platform_card.balance < amount:
+        return jsonify({"error": "Insufficient balance"}), 400
+
+    stripe_payment_id = None
+    if platform_card.stripe_card_id:
+        try:
+            intent = stripe.PaymentIntent.create(
+                amount=int(amount * 100),
+                currency="usd",
+                payment_method=platform_card.stripe_card_id,
+                confirm=True,
+            )
+            stripe_payment_id = intent.id
+        except stripe.error.StripeError as e:
+            return jsonify({"error": str(e)}), 400
+
+    platform_card.balance -= amount
+
+    transaction = Transaction(
+        user_id=user_id,
+        transaction_type="Purchase",
+        amount=amount,
+        details_encrypted=encrypt_data("Platform card purchase"),
+        stripe_payment_id=stripe_payment_id,
+    )
+    db.session.add(transaction)
+    db.session.commit()
+
+    return jsonify({
+        "message": "purchase successful",
+        "transaction_id": transaction.transaction_id,
+        "remaining_balance": platform_card.balance,
+    })
