@@ -1,6 +1,5 @@
 process.env.BACKEND_URL = 'http://your-backend-url';
 const {fetchGiftCards, consolidateGiftCards, linkBankAccount, transferFromBank, makePurchase} = require('../api');
-const { tokenize } = require('../tokenizer');
 
 global.fetch = jest.fn();
 
@@ -33,7 +32,7 @@ test('linkBankAccount posts data', async () => {
   expect(fetch).toHaveBeenCalledWith('http://your-backend-url/api/bank-accounts/link', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ user_id: 1, bank_token: tokenize('tok_bank') }),
+    body: JSON.stringify({ user_id: 1, bank_token: 'tok_bank' }),
     credentials: 'include',
   });
   expect(data).toEqual({message:'linked'});
@@ -45,7 +44,7 @@ test('transferFromBank posts data', async () => {
   expect(fetch).toHaveBeenCalledWith('http://your-backend-url/api/bank-accounts/transfer', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ user_id: 1, account_id: tokenize(2), amount: 10 }),
+    body: JSON.stringify({ user_id: 1, account_id: 2, amount: 10 }),
     credentials: 'include',
   });
   expect(data).toEqual({new_balance:10});

@@ -36,7 +36,7 @@ export const linkBankAccount = async (userId, bankToken) => {
     const response = await fetch(`${API_URL}/bank-accounts/link`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ user_id: userId, bank_token: tokenize(bankToken) }),
+      body: JSON.stringify({ user_id: userId, bank_token: bankToken }),
       credentials: 'include',
     });
     return await response.json();
@@ -51,7 +51,7 @@ export const transferFromBank = async (userId, accountId, amount) => {
     const response = await fetch(`${API_URL}/bank-accounts/transfer`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ user_id: userId, account_id: tokenize(accountId), amount }),
+      body: JSON.stringify({ user_id: userId, account_id: accountId, amount }),
       credentials: 'include',
     });
     return await response.json();
