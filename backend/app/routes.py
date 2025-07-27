@@ -1,5 +1,6 @@
 from cryptography.fernet import Fernet
 import os
+import re
 import stripe
 from flask import Blueprint, request, jsonify
 from flask_login import login_user, logout_user, current_user, login_required
@@ -60,6 +61,19 @@ def verify_payment(payment_intent_id):
         return intent.status == "succeeded"
     except stripe.error.StripeError:
         return False
+
+
+def validate_card_details(card_number: str, expiry_date: str):
+    """Validate card number format and expiry date."""
+    if not re.fullmatch(r"\d{12,19}", str(card_number)):
+        return "Invalid card number"
+    try:
+        exp = datetime.strptime(expiry_date, "%Y-%m-%d")
+    except ValueError:
+        return "Invalid expiry date format"
+    if exp.date() < datetime.utcnow().date():
+        return "Card already expired"
+    return None
 
 
 # Blueprint exposing REST API endpoints
@@ -140,6 +154,49 @@ def get_gift_cards():
             "source": card.source,
         })
     return jsonify(result)
+
+
+@api_bp.route("/gift-cards", methods=["POST"])
+def add_gift_card():
+    """Add a new gift card for a user."""
+    data = request.get_json() or {}
+    user_id = data.get("user_id")
+    card_number = data.get("card_number")
+    balance = data.get("balance")
+    expiry = data.get("expiry_date")
+    source = data.get("source", "physical_card")
+
+    if not all([user_id, card_number, balance, expiry]):
+        return jsonify({"error": "Missing required fields"}), 400
+
+    error = validate_card_details(card_number, expiry)
+    if error:
+        return jsonify({"error": error}), 400
+
+    try:
+        balance = float(balance)
+    except (TypeError, ValueError):
+        return jsonify({"error": "Invalid balance"}), 400
+
+    exp_dt = datetime.strptime(expiry, "%Y-%m-%d")
+
+    existing = GiftCard.query.filter_by(user_id=user_id).all()
+    for card in existing:
+        if decrypt_data(card.card_number) == card_number:
+            return jsonify({"error": "Card already exists"}), 409
+
+    encrypted_number = encrypt_data(card_number)
+
+    new_card = GiftCard(
+        user_id=user_id,
+        card_number=encrypted_number,
+        balance=balance,
+        expiry_date=exp_dt,
+        source=source,
+    )
+    db.session.add(new_card)
+    db.session.commit()
+    return jsonify({"message": "card added", "card_id": new_card.card_id}), 201
 
 
 @api_bp.route("/consolidate", methods=["POST"])
