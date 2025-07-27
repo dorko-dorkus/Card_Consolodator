@@ -2,9 +2,9 @@
 import React, { useEffect, useState } from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
-import HomeScreen from "../screens/HomeScreen";
-import ConsolidationScreen from "../screens/ConsolidationScreen";
-import PaymentScreen from "../screens/PaymentScreen";
+import HomeScreen from "./HomeScreen";
+import ConsolidationScreen from "./ConsolidationScreen";
+import PaymentScreen from "./PaymentScreen";
 import { StripeProvider } from "@stripe/stripe-react-native";
 import { getItem, saveItem } from "./SecureStore";
 
