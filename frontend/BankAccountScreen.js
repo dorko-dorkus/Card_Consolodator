@@ -1,18 +1,21 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import { View, TextInput, Button, StyleSheet } from "react-native";
 import { linkBankAccount } from "./api";
 import { ThemedText } from "./ThemedText";
 import { useColorScheme } from "./hooks/useColorScheme";
 import { Colors } from "./constants/Colors";
+import { AuthContext } from "./AuthContext";
 
 const BankAccountScreen = () => {
+  const { user } = useContext(AuthContext);
   const [bankToken, setBankToken] = useState("");
   const [message, setMessage] = useState("");
   const theme = useColorScheme() ?? "light";
   const tint = Colors[theme].tint;
 
   const handleLink = async () => {
-    const result = await linkBankAccount(1, bankToken);
+    if (!user) return;
+    const result = await linkBankAccount(user.user_id, bankToken);
     if (result?.message) {
       setMessage(result.message);
     } else if (result?.error) {

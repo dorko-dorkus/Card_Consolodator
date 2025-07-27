@@ -15,7 +15,14 @@ jest.mock('react-native', () => {
 import BankAccountScreen from '../BankAccountScreen';
 import TopUpScreen from '../TopUpScreen';
 import PurchaseScreen from '../PurchaseScreen';
+import { AuthContext } from '../AuthContext';
 import { linkBankAccount, transferFromBank, makePurchase } from '../api';
+
+jest.mock('../SecureStore', () => ({
+  getItem: jest.fn(),
+  saveItem: jest.fn(),
+  deleteItem: jest.fn(),
+}));
 
 jest.mock('../api');
 
@@ -28,7 +35,11 @@ describe('banking flows', () => {
     linkBankAccount.mockResolvedValue({ message: 'bank account linked' });
     let tree;
     await act(async () => {
-      tree = renderer.create(<BankAccountScreen />);
+      tree = renderer.create(
+        <AuthContext.Provider value={{ user: { user_id: 1 } }}>
+          <BankAccountScreen />
+        </AuthContext.Provider>
+      );
     });
     const root = tree.root;
     const input = root.findByProps({ placeholder: 'Bank token' });
@@ -48,7 +59,11 @@ describe('banking flows', () => {
     transferFromBank.mockResolvedValue({ new_balance: 15 });
     let tree;
     await act(async () => {
-      tree = renderer.create(<TopUpScreen />);
+      tree = renderer.create(
+        <AuthContext.Provider value={{ user: { user_id: 1 } }}>
+          <TopUpScreen />
+        </AuthContext.Provider>
+      );
     });
     const root = tree.root;
     const accInput = root.findByProps({ placeholder: 'Bank Account ID' });
@@ -70,7 +85,11 @@ describe('banking flows', () => {
     makePurchase.mockResolvedValue({ remaining_balance: 5 });
     let tree;
     await act(async () => {
-      tree = renderer.create(<PurchaseScreen />);
+      tree = renderer.create(
+        <AuthContext.Provider value={{ user: { user_id: 1 } }}>
+          <PurchaseScreen />
+        </AuthContext.Provider>
+      );
     });
     const root = tree.root;
     const input = root.findByProps({ placeholder: 'Amount' });
