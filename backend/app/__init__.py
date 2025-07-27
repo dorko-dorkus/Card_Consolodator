@@ -5,7 +5,7 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
 from flask_login import LoginManager
-from config import Config
+from .config import Config
 
 # Initialize Flask extensions
 # SQLAlchemy for database management
@@ -35,8 +35,8 @@ def create_app():
     login_manager.init_app(app)
 
     # Register application blueprints (routes)
-    from routes import api_bp
-    from webhooks import webhooks_bp
+    from .routes import api_bp
+    from .webhooks import webhooks_bp
 
     app.register_blueprint(api_bp, url_prefix='/api')
     app.register_blueprint(webhooks_bp, url_prefix='/api')

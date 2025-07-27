@@ -4,7 +4,7 @@ import stripe
 from flask import Blueprint, request, jsonify
 from datetime import datetime
 
-from models import db, GiftCard, PlatformGiftCard, User
+from .models import db, GiftCard, PlatformGiftCard, User
 
 # Load encryption key from environment variable or file
 ENCRYPTION_KEY_PATH = os.getenv("ENCRYPTION_KEY_PATH", "encryption_key.key")

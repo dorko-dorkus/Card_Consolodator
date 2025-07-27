@@ -1,8 +1,13 @@
-# Welcome to your Expo app 👋
+# Consolidator Project
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+This repository contains both the front-end and back-end code for the Consolidator application.
 
-## Get started
+* `frontend/` – an [Expo](https://expo.dev) React Native app.
+* `backend/` – a Flask API server.
+
+Each part can be run and developed independently.
+
+## Get started (frontend)
 
 1. Install dependencies
 
@@ -34,6 +39,14 @@ npm run reset-project
 ```
 
 This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+
+## Get started (backend)
+
+```bash
+cd backend
+pip install -r requirements.txt
+python run.py
+```
 
 ## Learn more
 
