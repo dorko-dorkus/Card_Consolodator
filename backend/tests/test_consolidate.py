@@ -7,7 +7,7 @@ os.environ.setdefault("SECRET_KEY", "test")
 
 from app.__init__ import create_app, db, bcrypt
 from app.models import User, GiftCard, PlatformGiftCard
-from app.routes import encrypt_data
+from app.encryption_utils import encrypt_data
 
 
 def setup_app():
