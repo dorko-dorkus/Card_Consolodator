@@ -1,5 +1,5 @@
 process.env.BACKEND_URL = 'http://your-backend-url';
-const {fetchGiftCards, consolidateGiftCards} = require('../api');
+const {fetchGiftCards, consolidateGiftCards, linkBankAccount, transferFromBank, makePurchase} = require('../api');
 
 global.fetch = jest.fn();
 
@@ -23,4 +23,37 @@ test('consolidateGiftCards posts data', async () => {
     body: JSON.stringify({ user_id: 2 }),
   });
   expect(data).toEqual({message:'ok'});
+});
+
+test('linkBankAccount posts data', async () => {
+  fetch.mockResolvedValue({json: () => Promise.resolve({message:'linked'})});
+  const data = await linkBankAccount(1, 'tok_bank');
+  expect(fetch).toHaveBeenCalledWith('http://your-backend-url/api/bank-accounts/link', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ user_id: 1, bank_token: 'tok_bank' }),
+  });
+  expect(data).toEqual({message:'linked'});
+});
+
+test('transferFromBank posts data', async () => {
+  fetch.mockResolvedValue({json: () => Promise.resolve({new_balance:10})});
+  const data = await transferFromBank(1, 2, 10);
+  expect(fetch).toHaveBeenCalledWith('http://your-backend-url/api/bank-accounts/transfer', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ user_id: 1, account_id: 2, amount: 10 }),
+  });
+  expect(data).toEqual({new_balance:10});
+});
+
+test('makePurchase posts data', async () => {
+  fetch.mockResolvedValue({json: () => Promise.resolve({remaining_balance:5})});
+  const data = await makePurchase(1, 5);
+  expect(fetch).toHaveBeenCalledWith('http://your-backend-url/api/purchase', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ user_id: 1, amount: 5 }),
+  });
+  expect(data).toEqual({remaining_balance:5});
 });

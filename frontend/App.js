@@ -5,6 +5,9 @@ import { createStackNavigator } from "@react-navigation/stack";
 import HomeScreen from "./HomeScreen";
 import ConsolidationScreen from "./ConsolidationScreen";
 import PaymentScreen from "./PaymentScreen";
+import BankAccountScreen from "./BankAccountScreen";
+import TopUpScreen from "./TopUpScreen";
+import PurchaseScreen from "./PurchaseScreen";
 import { StripeProvider } from "@stripe/stripe-react-native";
 import { getItem, saveItem } from "./SecureStore";
 
@@ -38,6 +41,9 @@ const App = () => {
           <Stack.Screen name="Home" component={HomeScreen} />
           <Stack.Screen name="Consolidate" component={ConsolidationScreen} />
           <Stack.Screen name="Checkout" component={PaymentScreen} />
+          <Stack.Screen name="BankAccounts" component={BankAccountScreen} />
+          <Stack.Screen name="TopUp" component={TopUpScreen} />
+          <Stack.Screen name="Purchase" component={PurchaseScreen} />
         </Stack.Navigator>
       </NavigationContainer>
     </StripeProvider>
