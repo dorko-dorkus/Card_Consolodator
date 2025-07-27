@@ -292,7 +292,7 @@ A helper script is provided to build an executable version of the backend and in
 run_installer.bat
 ```
 
-The script installs Python packages, builds `backend/run.py` into `backend/dist/run.exe` using PyInstaller and installs the frontend npm packages. If `backend/.env` does not exist it will be copied from `backend/.env.example`. Edit `backend/.env` with your real API keys before running `run.exe`.
+The script installs Python packages, builds `backend/run.py` into `backend/dist/run.exe` using PyInstaller and installs the frontend npm packages. If `backend/.env` does not exist it is copied from `backend/.env.example`, and the installer will prompt you for any missing environment variable values.
 
 ## Unix installer
 
