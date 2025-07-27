@@ -113,6 +113,25 @@ python run.py
 gunicorn wsgi:app
 ```
 
+### Docker
+
+You can build the API server into a container using the provided Dockerfile:
+
+```bash
+docker build -t consolidator-backend ./backend
+docker run --env-file backend/.env -p 8000:8000 consolidator-backend
+```
+
+A `docker-compose.yml` file is included to run the backend together with a
+persistent Redis instance used by Flask-Limiter:
+
+```bash
+docker compose up
+```
+
+The API will be available at `http://localhost:8000` and Redis data will be
+stored in the `redis-data` volume.
+
 Before starting the server, create a `.env` file for your local secrets:
 
 ```bash
