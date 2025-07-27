@@ -120,6 +120,10 @@ cp backend/.env.example backend/.env
 # then edit backend/.env and add your real credentials
 ```
 
+The server uses [Flask-CORS](https://flask-cors.readthedocs.io/) to allow
+cross-origin requests. Set the `CORS_ORIGINS` environment variable to a
+comma-separated list of allowed origins (defaults to `*`).
+
 Your `DATABASE_URL` should use a standard SQLAlchemy connection string. For example:
 
 * **Postgres**: `postgresql://user:password@hostname:5432/dbname`

@@ -26,3 +26,6 @@ class Config:
         'your_stripe_publishable_key_here'
     )
     STRIPE_WEBHOOK_SECRET = os.environ.get('STRIPE_WEBHOOK_SECRET', 'your_stripe_webhook_secret_here')
+
+    # Comma-separated list of origins allowed to access the API
+    CORS_ORIGINS = os.environ.get('CORS_ORIGINS', '*')

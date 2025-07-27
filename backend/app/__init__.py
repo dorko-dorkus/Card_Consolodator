@@ -6,6 +6,7 @@ from flask_wtf import CSRFProtect
 from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
 from flask_login import LoginManager
+from flask_cors import CORS
 from .config import Config
 
 # Initialize Flask extensions
@@ -38,6 +39,11 @@ def create_app():
     """
     app = Flask(__name__)
     app.config.from_object(Config)
+
+    # Configure CORS origins from environment or configuration
+    allowed_origins = os.getenv("CORS_ORIGINS", Config.CORS_ORIGINS)
+    origins_list = [o.strip() for o in allowed_origins.split(',')] if allowed_origins else "*"
+    CORS(app, origins=origins_list, supports_credentials=True)
 
     # Disable CSRF in testing environments
     import sys
