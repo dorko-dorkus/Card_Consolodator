@@ -4,4 +4,5 @@ module.exports = {
     ["@babel/preset-env", { targets: { node: 'current' } }],
     '@babel/preset-react',
   ],
+  plugins: ['expo-router/babel'],
 };
