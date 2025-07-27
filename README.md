@@ -283,3 +283,13 @@ server {
 This keeps Gunicorn behind the reverse proxy while still serving the API on
 port 80.
 
+
+## Windows installer
+
+A helper script is provided to build an executable version of the backend and install all dependencies. Run the following commands in a Windows command prompt:
+
+```bat
+run_installer.bat
+```
+
+The script installs Python packages, builds `backend/run.py` into `backend/dist/run.exe` using PyInstaller and installs the frontend npm packages. After completion, you can execute the generated `run.exe` to start the Flask API.
