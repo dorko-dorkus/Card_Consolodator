@@ -7,7 +7,6 @@ os.environ.setdefault("SECRET_KEY", "test")
 
 from app.__init__ import create_app, db, bcrypt
 from app.models import User, GiftCard, PlatformGiftCard
-from app.encryption_utils import encrypt_data
 
 
 def setup_app():
@@ -23,10 +22,10 @@ def create_user_with_cards(app):
         user = User(name='U', email='u@example.com', password_hash=pw)
         db.session.add(user)
         db.session.commit()
-        gc1 = GiftCard(user_id=user.user_id, card_number=encrypt_data('111111111111'),
+        gc1 = GiftCard(user_id=user.user_id, token='tok_gc1',
                        balance=10, expiry_date=datetime(2099,1,1), is_active=True,
                        source='physical_card')
-        gc2 = GiftCard(user_id=user.user_id, card_number=encrypt_data('222222222222'),
+        gc2 = GiftCard(user_id=user.user_id, token='tok_gc2',
                        balance=20, expiry_date=datetime(2099,1,1), is_active=True,
                        source='physical_card')
         db.session.add_all([gc1, gc2])

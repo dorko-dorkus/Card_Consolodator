@@ -196,14 +196,14 @@ You can add physical or imported gift cards to a user's account using the
 POST /api/gift-cards
 {
   "user_id": 1,
-  "card_number": "123456789012",
+  "card_token": "tok_123456",
   "balance": 50,
   "expiry_date": "2099-12-31",
   "source": "physical_card"  # or "imported_card"
 }
 ```
 
-The API validates the card number format and ensures the expiry date is in the
+The API accepts a PSP-issued card token and ensures the expiry date is in the
 future before storing the card.
 
 ## Learn more

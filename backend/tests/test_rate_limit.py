@@ -35,7 +35,7 @@ def test_unhandled_exception_returns_500(mocker):
 
     with app.app_context():
         from datetime import datetime
-        db.session.add(GiftCard(user_id=user_id, card_number='123', balance=10, expiry_date=datetime(2099,1,1), source='physical_card'))
+        db.session.add(GiftCard(user_id=user_id, token='tok_test', balance=10, expiry_date=datetime(2099,1,1), source='physical_card'))
         db.session.commit()
 
     mocker.patch('app.routes.stripe.PaymentIntent.create', side_effect=Exception('boom'))

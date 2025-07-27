@@ -1,7 +1,7 @@
 import os
 import re
 import stripe
-from .encryption_utils import encrypt_data, decrypt_data
+from .encryption_utils import encrypt_data
 from flask import Blueprint, request, jsonify
 from flask_limiter.errors import RateLimitExceeded
 from flask_login import login_user, logout_user, current_user, login_required
@@ -138,7 +138,7 @@ def get_gift_cards():
     for card in cards:
         result.append({
             "card_id": card.card_id,
-            "card_number": decrypt_data(card.card_number),
+            "card_token": card.token,
             "balance": card.balance,
             "expiry_date": card.expiry_date.isoformat()
             if isinstance(card.expiry_date, datetime)
@@ -159,35 +159,33 @@ def add_gift_card():
         user_id = int(user_id)
     except (TypeError, ValueError):
         return jsonify({"error": "Invalid user_id"}), 400
-    card_number = data.get("card_number")
+    card_token = data.get("card_token")
     balance = data.get("balance")
     expiry = data.get("expiry_date")
     source = data.get("source", "physical_card")
 
-    if not all([user_id, card_number, balance, expiry]):
+    if not all([user_id, card_token, balance, expiry]):
         return jsonify({"error": "Missing required fields"}), 400
 
-    error = validate_card_details(card_number, expiry)
-    if error:
-        return jsonify({"error": error}), 400
+    try:
+        exp_dt = datetime.strptime(expiry, "%Y-%m-%d")
+    except ValueError:
+        return jsonify({"error": "Invalid expiry date format"}), 400
+    if exp_dt.date() < datetime.utcnow().date():
+        return jsonify({"error": "Card already expired"}), 400
 
     try:
         balance = float(balance)
     except (TypeError, ValueError):
         return jsonify({"error": "Invalid balance"}), 400
 
-    exp_dt = datetime.strptime(expiry, "%Y-%m-%d")
-
-    existing = GiftCard.query.filter_by(user_id=user_id).all()
-    for card in existing:
-        if decrypt_data(card.card_number) == card_number:
-            return jsonify({"error": "Card already exists"}), 409
-
-    encrypted_number = encrypt_data(card_number)
+    existing = GiftCard.query.filter_by(user_id=user_id, token=card_token).first()
+    if existing:
+        return jsonify({"error": "Card already exists"}), 409
 
     new_card = GiftCard(
         user_id=user_id,
-        card_number=encrypted_number,
+        token=card_token,
         balance=balance,
         expiry_date=exp_dt,
         source=source,
