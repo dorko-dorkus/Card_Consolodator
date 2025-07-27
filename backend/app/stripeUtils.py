@@ -43,6 +43,5 @@ def issue_virtual_card(user_name, user_email):
         cardholder=cardholder.id,
         metadata={"user_email": user_email}
     )
-    
+
     return virtual_card
- 

@@ -9,7 +9,6 @@ load_dotenv(dotenv_path=env_path)
 from app.__init__ import create_app
 
 
-print("Hello World! (Remove later just to test if we can get anything to print)")
 app = create_app()
 print("App Created")
 
