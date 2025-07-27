@@ -126,11 +126,17 @@ A `docker-compose.yml` file is included to run the backend together with a
 persistent Redis instance used by Flask-Limiter:
 
 ```bash
-docker compose up
+docker compose up --build
 ```
 
 The API will be available at `http://localhost:8000` and Redis data will be
-stored in the `redis-data` volume.
+stored in the `redis-data` volume. When the services are running you can
+verify that `RATELIMIT_STORAGE_URL` and the variables from `.env` were passed
+to the container:
+
+```bash
+docker compose exec backend env | grep RATELIMIT_STORAGE_URL
+```
 
 Before starting the server, create a `.env` file for your local secrets:
 
@@ -246,3 +252,34 @@ When deploying with Docker Compose or `docker run`, pass this file using the
 docker compose up      # uses env_file in docker-compose.yml
 docker run --env-file backend/.env -p 8000:8000 consolidator-backend
 ```
+
+### Running behind a production web server
+
+For production deployments run the API with Gunicorn and place a reverse proxy
+like Nginx in front of it. Gunicorn should bind to a local interface so the
+proxy can forward requests:
+
+```bash
+gunicorn wsgi:app --workers 4 --bind 127.0.0.1:8000
+```
+
+A minimal Nginx configuration might look like this:
+
+```nginx
+server {
+    listen 80;
+    server_name example.com;
+
+    location / {
+        proxy_pass http://127.0.0.1:8000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
+```
+
+This keeps Gunicorn behind the reverse proxy while still serving the API on
+port 80.
+
