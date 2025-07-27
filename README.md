@@ -208,3 +208,29 @@ Join our community of developers creating universal apps.
 
 - [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
 - [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+
+## Deployment
+
+Create a `backend/.env` file before running the API in production. Copy the
+example file and replace each placeholder with your real credentials:
+
+```bash
+cp backend/.env.example backend/.env
+# edit backend/.env and set values for:
+#   SECRET_KEY
+#   DATABASE_URL
+#   STRIPE_SECRET_KEY
+#   STRIPE_PUBLISHABLE_KEY
+#   STRIPE_WEBHOOK_SECRET
+#   JWT_SECRET_KEY
+#   ENCRYPTION_KEY
+#   CORS_ORIGINS
+```
+
+When deploying with Docker Compose or `docker run`, pass this file using the
+`--env-file` option:
+
+```bash
+docker compose up      # uses env_file in docker-compose.yml
+docker run --env-file backend/.env -p 8000:8000 consolidator-backend
+```
