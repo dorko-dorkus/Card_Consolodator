@@ -26,3 +26,45 @@ export const consolidateGiftCards = async (userId) => {
     return null;
   }
 };
+
+export const linkBankAccount = async (userId, bankToken) => {
+  try {
+    const response = await fetch(`${API_URL}/bank-accounts/link`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ user_id: userId, bank_token: bankToken }),
+    });
+    return await response.json();
+  } catch (error) {
+    console.error("Error linking bank account:", error);
+    return null;
+  }
+};
+
+export const transferFromBank = async (userId, accountId, amount) => {
+  try {
+    const response = await fetch(`${API_URL}/bank-accounts/transfer`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ user_id: userId, account_id: accountId, amount }),
+    });
+    return await response.json();
+  } catch (error) {
+    console.error("Error transferring from bank:", error);
+    return null;
+  }
+};
+
+export const makePurchase = async (userId, amount) => {
+  try {
+    const response = await fetch(`${API_URL}/purchase`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ user_id: userId, amount }),
+    });
+    return await response.json();
+  } catch (error) {
+    console.error("Error making purchase:", error);
+    return null;
+  }
+};

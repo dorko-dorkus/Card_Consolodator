@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, Button, FlatList } from "react-native";
-import { fetchGiftCards, consolidateGiftCards } from "./api";
+import { fetchGiftCards } from "./api";
 
 const HomeScreen = ({ navigation }) => {
   const [giftCards, setGiftCards] = useState([]);
@@ -27,6 +27,9 @@ const HomeScreen = ({ navigation }) => {
         )}
       />
       <Button title="Consolidate" onPress={() => navigation.navigate("Consolidate")} />
+      <Button title="Bank Accounts" onPress={() => navigation.navigate("BankAccounts")} />
+      <Button title="Top Up" onPress={() => navigation.navigate("TopUp")} />
+      <Button title="Purchase" onPress={() => navigation.navigate("Purchase")} />
     </View>
   );
 };
