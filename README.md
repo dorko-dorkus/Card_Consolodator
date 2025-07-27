@@ -15,7 +15,13 @@ Each part can be run and developed independently.
    npm install
    ```
 
-2. Start the app
+2. Set your Stripe publishable key (required)
+
+   ```bash
+   export STRIPE_PUBLISHABLE_KEY=your-publishable-key
+   ```
+
+3. Start the app
 
    ```bash
     npx expo start
@@ -44,7 +50,9 @@ This command will move the starter code to the **app-example** directory and cre
 
 The Expo application stores the Stripe publishable key and recent payment tokens
 using `expo-secure-store`. Storing these values in the device keychain keeps
-credentials out of the codebase and adds a layer of security.
+credentials out of the codebase and adds a layer of security. You can also
+provide a `STRIPE_PUBLISHABLE_KEY` environment variable when starting the app;
+the value will be used before falling back to the stored credentials.
 
 ## Get started (backend)
 
