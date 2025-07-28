@@ -281,7 +281,7 @@ def link_bank_account():
     new_account = BankAccount(
         user_id=user_id,
         stripe_bank_account_id=bank_account.id,
-        bank_name=getattr(bank_account, "bank_name", None) or getattr(bank_account, "bank_name", None),
+        bank_name=getattr(bank_account, "bank_name", None),
         last4=getattr(bank_account, "last4", None),
     )
     db.session.add(new_account)
