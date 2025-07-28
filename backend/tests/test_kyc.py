@@ -65,3 +65,14 @@ def test_transaction_totals_persist():
         db_profile = UserProfile.query.get(user_id)
         assert db_profile.daily_total == 150
         assert db_profile.weekly_total == 150
+
+
+def test_card_balances_persist():
+    app = setup_app()
+    user_id = create_user(app)
+    with app.app_context():
+        profile = kyc.get_user_profile(user_id)
+        kyc.update_card_balance(profile, 1, 20.0)
+        profile2 = kyc.get_user_profile(user_id)
+        assert profile2.card_balances == [(1, 20.0)]
+
