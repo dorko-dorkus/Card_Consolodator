@@ -4,7 +4,7 @@ os.environ.setdefault("DATABASE_URL", "sqlite:///:memory:")
 os.environ.setdefault("SECRET_KEY", "test")
 
 from app.__init__ import create_app, db, bcrypt
-from app.models import User
+from app.models import User, UserProfile
 from app import aml, kyc
 
 
@@ -24,20 +24,25 @@ def create_user(app):
         return user.user_id
 
 
-def test_daily_limit_triggers_kyc():
+def test_daily_limit_triggers_kyc(mocker):
     app = setup_app()
     user_id = create_user(app)
+    mocker.patch("app.kyc.create_verification_session", return_value="sess")
     with app.app_context():
         for _ in range(4):
             aml.log_transaction(user_id, 250, "purchase")
         profile = kyc.get_user_profile(user_id)
         assert profile.kyc_status == "pending"
+        db_profile = UserProfile.query.get(user_id)
+        assert db_profile.verification_status == "pending"
 
 
-def test_single_large_transaction_flagged():
+def test_single_large_transaction_flagged(mocker):
     app = setup_app()
     user_id = create_user(app)
+    mocker.patch("app.kyc.create_verification_session", return_value="sess")
     with app.app_context():
         aml.log_transaction(user_id, 350, "purchase")
         profile = kyc.get_user_profile(user_id)
         assert profile.flagged is True
+        assert UserProfile.query.get(user_id).flagged is True
