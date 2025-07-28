@@ -2,6 +2,8 @@ import logging
 import os
 from datetime import datetime
 
+from .kyc import get_user_profile, process_transaction
+
 from .models import db, Transaction
 
 AUSTRAC_API_URL = os.getenv("AUSTRAC_API_URL", "https://api.austrac.gov.au/smr/submit")
@@ -53,6 +55,13 @@ def log_transaction(user_id: int, amount: float, transaction_type: str, stripe_p
     )
     db.session.add(txn)
     db.session.commit()
+
+    # Update KYC/AML monitoring profile
+    try:
+        profile = get_user_profile(user_id)
+        process_transaction(profile, amount, transaction_type, [])
+    except Exception as exc:
+        logging.getLogger("aml").error("KYC processing failed: %s", exc)
 
     if amount >= AML_THRESHOLD:
         report_suspicious_activity(txn)
