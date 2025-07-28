@@ -319,5 +319,8 @@ The [compliance](./compliance) directory contains the current SAQ A Questionnair
 
 The backend logs every purchase to the `transactions` table via `app/aml.py`.
 Transactions over `AML_THRESHOLD` (default AUD 10,000) automatically generate a
-suspicious matter report entry in the AML log for review. This simple monitoring
-framework aligns with AUSTRAC guidance for ongoing customer due diligence.
+suspicious matter report entry in the AML log and build a Suspicious Matter
+Report (SMR) payload. By default reports are stored to `LOCAL_SM_LOG_PATH` for
+manual submission, but setting `ENABLE_LIVE_SUBMISSION=true` will POST the SMR
+to `AUSTRAC_API_URL`. This simple monitoring framework aligns with AUSTRAC
+guidance for ongoing customer due diligence.
