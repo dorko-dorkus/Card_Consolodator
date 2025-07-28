@@ -14,6 +14,7 @@ class User(db.Model, UserMixin):
     gift_cards = db.relationship("GiftCard", back_populates="user")
     platform_cards = db.relationship("PlatformGiftCard", back_populates="user")
     bank_accounts = db.relationship("BankAccount", back_populates="user")
+    transactions = db.relationship("Transaction", back_populates="user")
 
     def get_id(self):
         """Return the user identifier for Flask-Login sessions."""
@@ -48,3 +49,17 @@ class BankAccount(db.Model):
     last4 = db.Column(db.String, nullable=True)
 
     user = db.relationship("User", back_populates="bank_accounts")
+
+
+class Transaction(db.Model):
+    """Record of payment transactions for AML monitoring."""
+    __tablename__ = 'transactions'
+
+    transaction_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.user_id'), nullable=False)
+    transaction_type = db.Column(db.String, nullable=False)
+    amount = db.Column(db.Float, nullable=False)
+    stripe_payment_id = db.Column(db.String, unique=True, nullable=True)
+    timestamp = db.Column(db.DateTime, nullable=True, default=datetime.utcnow)
+
+    user = db.relationship("User", back_populates="transactions")

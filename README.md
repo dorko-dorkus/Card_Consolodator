@@ -314,3 +314,10 @@ the backend executable.
 
 For details on how user data is handled see [PRIVACY_POLICY.md](./PRIVACY_POLICY.md). If a security incident occurs refer to our [BREACH_RESPONSE_PLAN.md](./BREACH_RESPONSE_PLAN.md).
 The [compliance](./compliance) directory contains the current SAQ A Questionnaire and Attestation of Compliance PDFs, version-controlled for audit purposes.
+
+### AML and transaction monitoring
+
+The backend logs every purchase to the `transactions` table via `app/aml.py`.
+Transactions over `AML_THRESHOLD` (default AUD 10,000) automatically generate a
+suspicious matter report entry in the AML log for review. This simple monitoring
+framework aligns with AUSTRAC guidance for ongoing customer due diligence.
