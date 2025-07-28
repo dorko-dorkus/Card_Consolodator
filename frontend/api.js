@@ -46,20 +46,6 @@ export const linkBankAccount = async (userId, bankToken) => {
   }
 };
 
-export const transferFromBank = async (userId, accountId, amount) => {
-  try {
-    const response = await fetch(`${API_URL}/bank-accounts/transfer`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ user_id: userId, account_id: accountId, amount }),
-      credentials: 'include',
-    });
-    return await response.json();
-  } catch (error) {
-    console.error("Error transferring from bank:", error);
-    return null;
-  }
-};
 
 export const makePurchase = async (userId, amount) => {
   try {

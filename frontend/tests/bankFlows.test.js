@@ -13,10 +13,9 @@ jest.mock('react-native', () => {
   };
 });
 import BankAccountScreen from '../BankAccountScreen';
-import TopUpScreen from '../TopUpScreen';
 import PurchaseScreen from '../PurchaseScreen';
 import { AuthContext } from '../AuthContext';
-import { linkBankAccount, transferFromBank, makePurchase } from '../api';
+import { linkBankAccount, makePurchase } from '../api';
 
 jest.mock('../SecureStore', () => ({
   getItem: jest.fn(),
@@ -55,31 +54,6 @@ describe('banking flows', () => {
     expect(text).toBeTruthy();
   });
 
-  test('TopUpScreen transfers funds and shows new balance', async () => {
-    transferFromBank.mockResolvedValue({ new_balance: 15 });
-    let tree;
-    await act(async () => {
-      tree = renderer.create(
-        <AuthContext.Provider value={{ user: { user_id: 1 } }}>
-          <TopUpScreen />
-        </AuthContext.Provider>
-      );
-    });
-    const root = tree.root;
-    const accInput = root.findByProps({ placeholder: 'Bank Account ID' });
-    const amtInput = root.findByProps({ placeholder: 'Amount' });
-    await act(async () => {
-      accInput.props.onChangeText('1');
-      amtInput.props.onChangeText('15');
-    });
-    const button = root.findByProps({ title: 'Transfer' });
-    await act(async () => {
-      button.props.onPress();
-    });
-    expect(transferFromBank).toHaveBeenCalledWith(1, '1', 15);
-    const text = root.findAllByType(require('react-native').Text).find(t => t.props.children === 'New balance: $15');
-    expect(text).toBeTruthy();
-  });
 
   test('PurchaseScreen makes purchase and shows remaining balance', async () => {
     makePurchase.mockResolvedValue({ remaining_balance: 5 });

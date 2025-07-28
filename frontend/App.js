@@ -6,7 +6,6 @@ import HomeScreen from "./HomeScreen";
 import ConsolidationScreen from "./ConsolidationScreen";
 import PaymentScreen from "./PaymentScreen";
 import BankAccountScreen from "./BankAccountScreen";
-import TopUpScreen from "./TopUpScreen";
 import PurchaseScreen from "./PurchaseScreen";
 import LoginScreen from "./LoginScreen";
 import RegisterScreen from "./RegisterScreen";
@@ -31,7 +30,6 @@ const AppNavigator = () => {
             <Stack.Screen name="Consolidate" component={ConsolidationScreen} />
             <Stack.Screen name="Checkout" component={PaymentScreen} />
             <Stack.Screen name="BankAccounts" component={BankAccountScreen} />
-            <Stack.Screen name="TopUp" component={TopUpScreen} />
             <Stack.Screen name="Purchase" component={PurchaseScreen} />
           </>
         ) : (
