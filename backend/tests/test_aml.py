@@ -26,13 +26,19 @@ def create_user(app):
         return user.user_id
 
 
-def test_large_purchase_triggers_report(mocker):
+def test_large_purchase_triggers_report(mocker, tmp_path):
+    log_path = tmp_path / "smr.log"
+    os.environ["ENABLE_LIVE_SUBMISSION"] = "false"
+    aml.LOCAL_SM_LOG_PATH = str(log_path)
+    aml.ENABLE_LIVE_SUBMISSION = False
+
     app = setup_app()
     user_id = create_user(app)
     client = app.test_client()
     client.post("/api/login", json={"email": "u@example.com", "password": "pw"})
 
     spy = mocker.spy(aml, "report_suspicious_activity")
+    post_mock = mocker.patch("requests.post")
 
     mocker.patch("app.routes.stripe.PaymentIntent.create", return_value=type("obj", (object,), {"id": "pi_lg"})())
 
@@ -42,3 +48,6 @@ def test_large_purchase_triggers_report(mocker):
     )
     assert resp.status_code == 200
     assert spy.call_count == 1
+    post_mock.assert_not_called()
+    with open(log_path) as f:
+        assert len(f.readlines()) == 1
