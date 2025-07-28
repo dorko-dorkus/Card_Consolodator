@@ -6,6 +6,7 @@ os.environ.setdefault("STRIPE_WEBHOOK_SECRET", "whsec_test")
 os.environ.setdefault("DATABASE_URL", "sqlite:///:memory:")
 os.environ.setdefault("SECRET_KEY", "test")
 os.environ.setdefault("AML_THRESHOLD", "5000")
+os.environ.setdefault("CORS_ORIGINS", "http://localhost")
 
 from app.__init__ import create_app, db, bcrypt
 from app.models import User
