@@ -22,16 +22,15 @@ class UserProfile:
         self.user_id = user_id
         self.db_profile = db_profile
         self.kyc_status = db_profile.verification_status
-        self.daily_total = 0.0
-        self.weekly_total = 0.0
+        self.daily_total = db_profile.daily_total or 0.0
+        self.weekly_total = db_profile.weekly_total or 0.0
         self.card_balances: list[tuple[int, float]] = []
         self.txn_log: list[tuple[float, str, list, datetime]] = []
         self.flagged = db_profile.flagged
-        self._day = datetime.utcnow().date()
-        self._week_start = self._day - timedelta(days=self._day.weekday())
-
-
-_profiles: dict[int, UserProfile] = {}
+        self._day = db_profile.day or datetime.utcnow().date()
+        self._week_start = db_profile.week_start or (
+            self._day - timedelta(days=self._day.weekday())
+        )
 
 
 def get_user_profile(user_id: int) -> UserProfile:
@@ -40,14 +39,7 @@ def get_user_profile(user_id: int) -> UserProfile:
         db_profile = ProfileModel(user_id=user_id)
         db.session.add(db_profile)
         db.session.commit()
-    profile = _profiles.get(user_id)
-    if not profile:
-        profile = UserProfile(user_id, db_profile)
-        _profiles[user_id] = profile
-    else:
-        profile.db_profile = db_profile
-        profile.kyc_status = db_profile.verification_status
-        profile.flagged = db_profile.flagged
+    profile = UserProfile(user_id, db_profile)
     return profile
 
 
@@ -60,6 +52,10 @@ def _reset_totals_if_needed(user: UserProfile) -> None:
     if user._week_start != week_start:
         user._week_start = week_start
         user.weekly_total = 0.0
+    user.db_profile.day = user._day
+    user.db_profile.week_start = user._week_start
+    user.db_profile.daily_total = user.daily_total
+    user.db_profile.weekly_total = user.weekly_total
 
 
 def process_transaction(user: UserProfile, amount: float, merchant_id: str, source_cards: list):
@@ -70,6 +66,10 @@ def process_transaction(user: UserProfile, amount: float, merchant_id: str, sour
 
     user.daily_total += amount
     user.weekly_total += amount
+    user.db_profile.daily_total = user.daily_total
+    user.db_profile.weekly_total = user.weekly_total
+    user.db_profile.day = user._day
+    user.db_profile.week_start = user._week_start
     user.txn_log.append((amount, merchant_id, source_cards, datetime.utcnow()))
 
     total_consolidated = sum(balance for _, balance in user.card_balances)
@@ -81,6 +81,9 @@ def process_transaction(user: UserProfile, amount: float, merchant_id: str, sour
 
     if detect_structuring(user):
         flag_suspicious(user, reason="Suspected structuring to avoid AML triggers")
+
+    db.session.add(user.db_profile)
+    db.session.commit()
 
 
 def trigger_kyc(user: UserProfile, reason: str):

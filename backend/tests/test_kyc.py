@@ -46,3 +46,20 @@ def test_single_large_transaction_flagged(mocker):
         profile = kyc.get_user_profile(user_id)
         assert profile.flagged is True
         assert UserProfile.query.get(user_id).flagged is True
+
+
+def test_transaction_totals_persist():
+    app = setup_app()
+    user_id = create_user(app)
+    with app.app_context():
+        aml.log_transaction(user_id, 100, "purchase")
+        aml.log_transaction(user_id, 50, "purchase")
+        profile = kyc.get_user_profile(user_id)
+        assert profile.daily_total == 150
+        assert profile.weekly_total == 150
+        # ensure fetching again reflects stored totals
+        profile2 = kyc.get_user_profile(user_id)
+        assert profile2.daily_total == 150
+        db_profile = UserProfile.query.get(user_id)
+        assert db_profile.daily_total == 150
+        assert db_profile.weekly_total == 150

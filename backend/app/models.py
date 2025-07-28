@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, date, timedelta
 from flask_login import UserMixin
 from .__init__ import db
 
@@ -71,6 +71,10 @@ class UserProfile(db.Model):
     verification_status = db.Column(db.String, nullable=False, default='not_verified')
     veriff_session_id = db.Column(db.String, nullable=True)
     flagged = db.Column(db.Boolean, default=False)
+    daily_total = db.Column(db.Float, default=0.0)
+    weekly_total = db.Column(db.Float, default=0.0)
+    day = db.Column(db.Date, default=date.today)
+    week_start = db.Column(db.Date, default=lambda: date.today() - timedelta(days=date.today().weekday()))
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
