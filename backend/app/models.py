@@ -146,3 +146,12 @@ class AMLLogEntry(db.Model):
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
 
     user = db.relationship('User', backref='aml_logs')
+
+class CardBalance(db.Model):
+    __tablename__ = "card_balances"
+    user_id = db.Column(db.Integer, db.ForeignKey("users.user_id"), primary_key=True)
+    card_id = db.Column(db.Integer, primary_key=True)
+    balance = db.Column(db.Float, nullable=False, default=0.0)
+
+    user = db.relationship("User", backref="card_balances")
+

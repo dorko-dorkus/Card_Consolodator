@@ -7,6 +7,7 @@ from .models import (
     VerificationAuditLog,
     KYCRecord,
     AMLLogEntry,
+    CardBalance,
 )
 from .veriff_service import create_verification_session
 
@@ -24,7 +25,10 @@ class UserProfile:
         self.kyc_status = db_profile.verification_status
         self.daily_total = db_profile.daily_total or 0.0
         self.weekly_total = db_profile.weekly_total or 0.0
-        self.card_balances: list[tuple[int, float]] = []
+        balances = CardBalance.query.filter_by(user_id=user_id).all()
+        self.card_balances: list[tuple[int, float]] = [
+            (b.card_id, b.balance) for b in balances
+        ]
         self.txn_log: list[tuple[float, str, list, datetime]] = []
         self.flagged = db_profile.flagged
         self._day = db_profile.day or datetime.utcnow().date()
@@ -58,8 +62,29 @@ def _reset_totals_if_needed(user: UserProfile) -> None:
     user.db_profile.weekly_total = user.weekly_total
 
 
+def update_card_balance(user: UserProfile, card_id: int, balance: float) -> None:
+    """Persist a card balance for monitoring purposes."""
+    for idx, (cid, _) in enumerate(user.card_balances):
+        if cid == card_id:
+            user.card_balances[idx] = (card_id, balance)
+            break
+    else:
+        user.card_balances.append((card_id, balance))
+
+    cb = CardBalance.query.filter_by(user_id=user.user_id, card_id=card_id).first()
+    if not cb:
+        cb = CardBalance(user_id=user.user_id, card_id=card_id, balance=balance)
+        db.session.add(cb)
+    else:
+        cb.balance = balance
+    db.session.commit()
+
+
 def process_transaction(user: UserProfile, amount: float, merchant_id: str, source_cards: list):
     _reset_totals_if_needed(user)
+
+    for cid, bal in source_cards:
+        update_card_balance(user, cid, bal)
 
     if amount > MAX_SINGLE_TXN_LIMIT:
         flag_suspicious(user, reason="Single transaction exceeds soft threshold")
