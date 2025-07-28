@@ -13,3 +13,4 @@ Flask-Migrate
 alembic
 flask-limiter
 requests
+APScheduler

@@ -324,3 +324,9 @@ Report (SMR) payload. By default reports are stored to `LOCAL_SM_LOG_PATH` for
 manual submission, but setting `ENABLE_LIVE_SUBMISSION=true` will POST the SMR
 to `AUSTRAC_API_URL`. This simple monitoring framework aligns with AUSTRAC
 guidance for ongoing customer due diligence.
+
+Daily background jobs review recent transactions to detect structuring activity
+beyond the single transaction threshold. The scheduler also alerts the
+compliance team when a user profile is flagged or remains in a pending KYC state
+for more than three days. Alerts are written to the `compliance` log for
+follow‑up.

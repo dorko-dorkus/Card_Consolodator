@@ -77,6 +77,8 @@ def create_app():
 
     with app.app_context():
         from . import models  # ensure models are registered for migrations
+        from .scheduled_tasks import init_scheduler
+        init_scheduler(app)
 
     # Register application blueprints (routes)
     from .routes import api_bp
