@@ -13,7 +13,8 @@ def load_encryption_key():
             return key_file.read()
     else:
         key = Fernet.generate_key()
-        with open(ENCRYPTION_KEY_PATH, "wb") as key_file:
+        fd = os.open(ENCRYPTION_KEY_PATH, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
+        with os.fdopen(fd, "wb") as key_file:
             key_file.write(key)
         return key
 
