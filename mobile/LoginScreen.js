@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, Button, StyleSheet } from 'react-native';
-import { loginUser } from './api';
+import { loginUser, sessionInfo } from './api';
 
-const LoginScreen = () => {
+const LoginScreen = ({ navigation }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [message, setMessage] = useState('');
@@ -12,7 +12,12 @@ const LoginScreen = () => {
     if (res?.error) {
       setMessage(res.error);
     } else {
-      setMessage(res.message || 'Login successful');
+      const info = await sessionInfo();
+      if (info?.authenticated) {
+        navigation.replace('Home');
+      } else {
+        setMessage('Login failed');
+      }
     }
   };
 
