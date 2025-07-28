@@ -83,12 +83,17 @@
     {
       "id": 6,
       "name": "Compliance Documentation",
-      "status": "failed",
+      "status": "passed",
       "details": [
         {
-          "file": "compliance/README.md",
-          "snippet": "SAQ A Compliance Overview",
-          "comment": "Compliance directory lacks SAQ A questionnaire or attestation materials."
+          "file": "compliance/SAQ_A_Questionnaire.pdf",
+          "snippet": "SAQ A Questionnaire 2024",
+          "comment": "Current SAQ A questionnaire is stored under version control."
+        },
+        {
+          "file": "compliance/Attestation_of_Compliance.pdf",
+          "snippet": "Attestation of Compliance 2024",
+          "comment": "Current attestation document is stored under version control."
         }
       ]
     }
