@@ -256,7 +256,6 @@ cp backend/.env.example backend/.env
 #   STRIPE_SECRET_KEY
 #   STRIPE_PUBLISHABLE_KEY
 #   STRIPE_WEBHOOK_SECRET
-#   JWT_SECRET_KEY
 #   ENCRYPTION_KEY
 #   CORS_ORIGINS
 ```
