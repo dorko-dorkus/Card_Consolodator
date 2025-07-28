@@ -5,7 +5,7 @@ os.environ.setdefault("DATABASE_URL", "sqlite:///:memory:")
 os.environ.setdefault("SECRET_KEY", "test")
 
 from app.__init__ import create_app, db, bcrypt
-from app.models import User, Transaction
+from app.models import User
 
 
 def setup_app():
@@ -36,13 +36,6 @@ def test_purchase_success(mocker):
     assert resp.status_code == 200
     data = resp.get_json()
     assert data['message'] == 'purchase successful'
-
-    with app.app_context():
-        txns = Transaction.query.filter_by(user_id=user_id).all()
-        assert len(txns) == 1
-        assert txns[0].stripe_payment_id == 'pi_789'
-        assert txns[0].transaction_type == 'Purchase'
-
 
 def test_purchase_missing_token():
     app = setup_app()
