@@ -143,6 +143,7 @@ You can build the API server into a container using the provided Dockerfile:
 
 ```bash
 docker build -t consolidator-backend ./backend
+cp backend/.env.example backend/.env
 docker run --env-file backend/.env -p 8000:8000 consolidator-backend
 ```
 
