@@ -47,7 +47,6 @@ class Transaction(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('users.user_id'), nullable=False)
     transaction_type = db.Column(db.String, nullable=False)  # Deposit, Transfer, Consolidation
     amount = db.Column(db.Float, nullable=False)
-    details_encrypted = db.Column(db.String, nullable=False)
     stripe_payment_id = db.Column(db.String, unique=True, nullable=True)  # Stripe Payment Intent ID
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
 
