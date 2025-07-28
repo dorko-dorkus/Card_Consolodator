@@ -43,17 +43,6 @@ def verify_payment(payment_intent_id):
         return False
 
 
-def validate_card_details(card_number: str, expiry_date: str):
-    """Validate card number format and expiry date."""
-    if not re.fullmatch(r"\d{12,19}", str(card_number)):
-        return "Invalid card number"
-    try:
-        exp = datetime.strptime(expiry_date, "%Y-%m-%d")
-    except ValueError:
-        return "Invalid expiry date format"
-    if exp.date() < datetime.utcnow().date():
-        return "Card already expired"
-    return None
 
 
 # Blueprint exposing REST API endpoints
