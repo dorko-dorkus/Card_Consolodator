@@ -25,7 +25,6 @@ class GiftCard(db.Model):
     card_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.user_id'), nullable=False)
     token = db.Column(db.String, unique=True, nullable=False)
-    balance = db.Column(db.Float, nullable=False)
     expiry_date = db.Column(db.DateTime, nullable=False)
     is_active = db.Column(db.Boolean, default=True)
     source = db.Column(db.String, nullable=False)  # e.g., "physical_card", "bank_transfer"
@@ -36,7 +35,6 @@ class PlatformGiftCard(db.Model):
     __tablename__ = 'platform_gift_cards'
     card_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.user_id'), nullable=False)
-    balance = db.Column(db.Float, nullable=False)
     stripe_card_id = db.Column(db.String, unique=True, nullable=True)  # Stripe-issued NFC card ID
 
     user = db.relationship("User", back_populates="platform_cards")

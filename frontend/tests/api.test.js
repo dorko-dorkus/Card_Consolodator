@@ -40,7 +40,7 @@ test('linkBankAccount posts data', async () => {
 
 
 test('makePurchase posts data', async () => {
-  fetch.mockResolvedValue({json: () => Promise.resolve({remaining_balance:5})});
+  fetch.mockResolvedValue({json: () => Promise.resolve({message:'purchase successful'})});
   const data = await makePurchase(1, 5, 'pm_tok');
   expect(fetch).toHaveBeenCalledWith('http://your-backend-url/api/purchase', {
     method: 'POST',
@@ -48,5 +48,5 @@ test('makePurchase posts data', async () => {
     body: JSON.stringify({ user_id: 1, amount: 5, payment_token: 'pm_tok' }),
     credentials: 'include',
   });
-  expect(data).toEqual({remaining_balance:5});
+  expect(data).toEqual({message:'purchase successful'});
 });

@@ -34,7 +34,6 @@ def test_add_gift_card_success():
     resp = client.post('/api/gift-cards', json={
         'user_id': user_id,
         'card_token': 'tok_123456',
-        'balance': 25,
         'expiry_date': '2099-01-01',
         'source': 'physical_card'
     })
@@ -45,7 +44,6 @@ def test_add_gift_card_success():
     with app.app_context():
         cards = GiftCard.query.filter_by(user_id=user_id).all()
         assert len(cards) == 1
-        assert cards[0].balance == 25
         assert cards[0].token == 'tok_123456'
 
 
@@ -58,7 +56,6 @@ def test_add_gift_card_expired():
     resp = client.post('/api/gift-cards', json={
         'user_id': user_id,
         'card_token': 'tok_expired',
-        'balance': 10,
         'expiry_date': '2000-01-01'
     })
     assert resp.status_code == 400

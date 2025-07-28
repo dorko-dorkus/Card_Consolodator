@@ -7,7 +7,7 @@ os.environ.setdefault("SECRET_KEY", "test")
 os.environ.setdefault("RATE_LIMIT", "1/minute")
 
 from app.__init__ import create_app, db, bcrypt, limiter
-from app.models import User, GiftCard
+from app.models import User
 
 
 def setup_app():
@@ -33,13 +33,8 @@ def test_unhandled_exception_returns_500(mocker):
     client = app.test_client()
     client.post('/api/login', json={'email': 'u@example.com', 'password': 'pw'})
 
-    with app.app_context():
-        from datetime import datetime
-        db.session.add(GiftCard(user_id=user_id, token='tok_test', balance=10, expiry_date=datetime(2099,1,1), source='physical_card'))
-        db.session.commit()
-
     mocker.patch('app.routes.stripe.PaymentIntent.create', side_effect=Exception('boom'))
-    resp = client.post('/api/consolidate', json={'user_id': user_id})
+    resp = client.post('/api/purchase', json={'user_id': user_id, 'amount': 5, 'payment_token': 'pm_card'})
     assert resp.status_code == 500
     assert resp.get_json()['error'] == 'Server error'
 

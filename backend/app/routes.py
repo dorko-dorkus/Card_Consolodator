@@ -138,7 +138,6 @@ def get_gift_cards():
         result.append({
             "card_id": card.card_id,
             "card_token": card.token,
-            "balance": card.balance,
             "expiry_date": card.expiry_date.isoformat()
             if isinstance(card.expiry_date, datetime)
             else str(card.expiry_date),
@@ -159,11 +158,10 @@ def add_gift_card():
     except (TypeError, ValueError):
         return jsonify({"error": "Invalid user_id"}), 400
     card_token = data.get("card_token")
-    balance = data.get("balance")
     expiry = data.get("expiry_date")
     source = data.get("source", "physical_card")
 
-    if not all([user_id, card_token, balance, expiry]):
+    if not all([user_id, card_token, expiry]):
         return jsonify({"error": "Missing required fields"}), 400
 
     try:
@@ -173,11 +171,6 @@ def add_gift_card():
     if exp_dt.date() < datetime.utcnow().date():
         return jsonify({"error": "Card already expired"}), 400
 
-    try:
-        balance = float(balance)
-    except (TypeError, ValueError):
-        return jsonify({"error": "Invalid balance"}), 400
-
     existing = GiftCard.query.filter_by(user_id=user_id, token=card_token).first()
     if existing:
         return jsonify({"error": "Card already exists"}), 409
@@ -185,7 +178,6 @@ def add_gift_card():
     new_card = GiftCard(
         user_id=user_id,
         token=card_token,
-        balance=balance,
         expiry_date=exp_dt,
         source=source,
     )
@@ -193,49 +185,6 @@ def add_gift_card():
     db.session.commit()
     return jsonify({"message": "card added", "card_id": new_card.card_id}), 201
 
-
-@api_bp.route("/consolidate", methods=["POST"])
-@login_required
-def consolidate_cards():
-    """Consolidate all active gift cards into the user's platform card."""
-    data = request.get_json() or {}
-    user_id = data.get("user_id")
-    try:
-        user_id = int(user_id)
-    except (TypeError, ValueError):
-        return jsonify({"error": "Invalid user_id"}), 400
-    if not user_id:
-        return jsonify({"error": "user_id required"}), 400
-
-    cards = GiftCard.query.filter_by(user_id=user_id, is_active=True).all()
-    if not cards:
-        return jsonify({"message": "No gift cards to consolidate."})
-
-    total = sum(card.balance for card in cards)
-    for card in cards:
-        card.is_active = False
-        card.balance = 0
-
-    platform_card = PlatformGiftCard.query.filter_by(user_id=user_id).first()
-    if platform_card:
-        platform_card.balance += total
-    else:
-        platform_card = PlatformGiftCard(user_id=user_id, balance=total)
-        db.session.add(platform_card)
-
-    db.session.commit()
-
-    try:
-        intent = stripe.PaymentIntent.create(
-            amount=int(total * 100),
-            currency="usd",
-            metadata={"user_id": user_id},
-        )
-        client_secret = intent.client_secret
-    except stripe.error.StripeError:
-        client_secret = None
-
-    return jsonify({"message": "Consolidation complete", "client_secret": client_secret})
 
 
 @api_bp.route("/bank-accounts/link", methods=["POST"])
@@ -289,11 +238,7 @@ def link_bank_account():
 @api_bp.route("/purchase", methods=["POST"])
 @login_required
 def make_purchase():
-    """Charge a user's consolidated balance toward a purchase.
-
-    Supports split tender transactions by charging the platform gift card first
-    and the remainder to an additional payment token if provided.
-    """
+    """Charge a user's payment token for a purchase."""
 
     data = request.get_json() or {}
     user_id = data.get("user_id")
@@ -305,7 +250,7 @@ def make_purchase():
     except (TypeError, ValueError):
         return jsonify({"error": "Invalid user_id"}), 400
 
-    if user_id is None or amount is None:
+    if user_id is None or amount is None or not payment_token:
         return jsonify({"error": "Missing required fields"}), 400
 
     try:
@@ -313,48 +258,22 @@ def make_purchase():
     except (TypeError, ValueError):
         return jsonify({"error": "Invalid amount"}), 400
 
-    platform_card = PlatformGiftCard.query.filter_by(user_id=user_id).first()
-    if not platform_card:
-        return jsonify({"error": "Insufficient balance"}), 400
-
-    gift_amount = min(platform_card.balance, amount)
-    card_amount = amount - gift_amount
-
-    stripe_ids = []
-
-    if gift_amount > 0 and platform_card.stripe_card_id:
-        try:
-            intent = stripe.PaymentIntent.create(
-                amount=int(gift_amount * 100),
-                currency="usd",
-                payment_method=platform_card.stripe_card_id,
-                confirm=True,
-            )
-            stripe_ids.append(intent.id)
-        except stripe.error.StripeError as e:
-            return jsonify({"error": str(e)}), 400
-
-    if card_amount > 0:
-        if not payment_token:
-            return jsonify({"error": "Insufficient balance"}), 400
-        try:
-            intent = stripe.PaymentIntent.create(
-                amount=int(card_amount * 100),
-                currency="usd",
-                payment_method=payment_token,
-                confirm=True,
-            )
-            stripe_ids.append(intent.id)
-        except stripe.error.StripeError as e:
-            return jsonify({"error": str(e)}), 400
-
-    platform_card.balance -= gift_amount
+    try:
+        intent = stripe.PaymentIntent.create(
+            amount=int(amount * 100),
+            currency="usd",
+            payment_method=payment_token,
+            confirm=True,
+        )
+        stripe_id = intent.id
+    except stripe.error.StripeError as e:
+        return jsonify({"error": str(e)}), 400
 
     transaction = Transaction(
         user_id=user_id,
         transaction_type="Purchase",
         amount=amount,
-        stripe_payment_id=",".join(stripe_ids) if stripe_ids else None,
+        stripe_payment_id=stripe_id,
     )
     db.session.add(transaction)
     db.session.commit()
@@ -362,5 +281,4 @@ def make_purchase():
     return jsonify({
         "message": "purchase successful",
         "transaction_id": transaction.transaction_id,
-        "remaining_balance": platform_card.balance,
     })

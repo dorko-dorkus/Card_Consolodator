@@ -22,8 +22,8 @@ const PurchaseScreen = () => {
       parseFloat(amount),
       token || undefined
     );
-    if (result?.remaining_balance !== undefined) {
-      setMessage(`Remaining balance: $${result.remaining_balance}`);
+    if (result?.message) {
+      setMessage(result.message);
     } else if (result?.error) {
       setMessage(result.error);
     }

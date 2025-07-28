@@ -55,8 +55,8 @@ describe('banking flows', () => {
   });
 
 
-  test('PurchaseScreen makes purchase and shows remaining balance', async () => {
-    makePurchase.mockResolvedValue({ remaining_balance: 5 });
+  test('PurchaseScreen makes purchase and shows message', async () => {
+    makePurchase.mockResolvedValue({ message: 'purchase successful' });
     const { getItem } = require('../SecureStore');
     getItem.mockResolvedValue('pm_tok');
     let tree;
@@ -77,7 +77,7 @@ describe('banking flows', () => {
       button.props.onPress();
     });
     expect(makePurchase).toHaveBeenCalledWith(1, 5, 'pm_tok');
-    const text = root.findAllByType(require('react-native').Text).find(t => t.props.children === 'Remaining balance: $5');
+    const text = root.findAllByType(require('react-native').Text).find(t => t.props.children === 'purchase successful');
     expect(text).toBeTruthy();
   });
 });
