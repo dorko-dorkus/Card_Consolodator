@@ -3,17 +3,22 @@
     {
       "id": 1,
       "name": "PCI DSS SAQ A Scope",
-      "status": "failed",
+      "status": "passed",
       "details": [
         {
-          "file": "README.md",
-          "snippet": "  \"card_token\": \"tok_123456\"",
-          "comment": "Documentation now shows a PSP token being sent to the backend via the gift card API."
+          "file": "frontend/PaymentScreen.js",
+          "snippet": "useStripe() presentGooglePay",
+          "comment": "Front-end uses Stripe's client library to tokenize payments."
+        },
+        {
+          "file": "frontend/tokenizer.js",
+          "snippet": "export function tokenize(value)",
+          "comment": "Custom tokenization ensures only opaque tokens are sent."
         },
         {
           "file": "backend/app/routes.py",
           "snippet": "card_token = data.get(\"card_token\")",
-          "comment": "Backend route now expects a PSP token instead of a raw card number."
+          "comment": "Backend expects a token, not raw card details."
         }
       ]
     },
@@ -23,26 +28,26 @@
       "status": "failed",
       "details": [
         {
-          "file": "frontend/TopUpScreen.js",
-          "snippet": "const handleTransfer = async () => {",
-          "comment": "Client-side top-up screen transfers funds from a bank account."
+          "file": "backend/app/models.py",
+          "snippet": "class GiftCard ... balance",
+          "comment": "Database schema stores gift card balances."
         },
         {
-          "file": "backend/app/routes.py",
-          "snippet": "@api_bp.route(\"/bank-accounts/transfer\", methods=[\"POST\"])",
-          "comment": "Backend endpoint credits a balance via bank transfer."
+          "file": "backend/app/webhooks.py",
+          "snippet": "platform_card.balance += amount",
+          "comment": "Webhook credits value to user accounts."
         }
       ]
     },
     {
       "id": 3,
       "name": "Split-Tender and PSP Integration",
-      "status": "failed",
+      "status": "passed",
       "details": [
         {
           "file": "backend/app/routes.py",
-          "snippet": "intent = stripe.PaymentIntent.create(",
-          "comment": "Single PaymentIntent used; no separate calls for split-tender processing."
+          "snippet": "PaymentIntent.create ... card_amount",
+          "comment": "Separate PaymentIntents handle gift card and card portions."
         }
       ]
     },
@@ -53,30 +58,25 @@
       "details": [
         {
           "file": "backend/app/models.py",
-          "snippet": "class GiftCard(db.Model):",
-          "comment": "Database stores a PSP token, balance and other financial data."
-        },
-        {
-          "file": "backend/app/models.py",
-          "snippet": "class Transaction(db.Model):",
-          "comment": "Transaction amounts and details are persisted."
+          "snippet": "Transaction ... amount",
+          "comment": "Transaction amounts and card balances are persisted."
         }
       ]
     },
     {
       "id": 5,
       "name": "Privacy Law Artifacts",
-      "status": "failed",
+      "status": "passed",
       "details": [
         {
-          "file": "(repository root)",
-          "snippet": "find . -name '*privacy*' -print -> (no results)",
-          "comment": "No privacy policy document found."
+          "file": "PRIVACY_POLICY.md",
+          "snippet": "# Privacy Policy",
+          "comment": "Repository includes a privacy policy document."
         },
         {
-          "file": "(repository root)",
-          "snippet": "find . -name '*breach*' -print -> (no results)",
-          "comment": "No breach response plan present."
+          "file": "BREACH_RESPONSE_PLAN.md",
+          "snippet": "# Breach Response Plan",
+          "comment": "Repository includes a breach response plan."
         }
       ]
     },
@@ -86,9 +86,9 @@
       "status": "failed",
       "details": [
         {
-          "file": "(repository root)",
-          "snippet": "find . -type d -name 'compliance' -> (no results)",
-          "comment": "Required compliance directory with SAQ A materials is missing."
+          "file": "compliance/README.md",
+          "snippet": "SAQ A Compliance Overview",
+          "comment": "Compliance directory lacks SAQ A questionnaire or attestation materials."
         }
       ]
     }
