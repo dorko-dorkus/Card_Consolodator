@@ -5,6 +5,7 @@ from flask import Blueprint, request, jsonify, current_app
 from flask_limiter.errors import RateLimitExceeded
 from flask_login import login_user, logout_user, current_user, login_required
 from .__init__ import bcrypt, csrf
+from .aml import log_transaction
 from datetime import datetime
 from .config import Config
 
@@ -272,5 +273,7 @@ def make_purchase():
     current_app.logger.info(
         "purchase", extra={"user_id": user_id, "stripe_payment_id": stripe_id, "timestamp": datetime.utcnow().isoformat()}
     )
+
+    log_transaction(user_id=user_id, amount=amount, transaction_type="purchase", stripe_payment_id=stripe_id)
 
     return jsonify({"message": "purchase successful"})
