@@ -104,3 +104,38 @@ class VerificationAuditLog(db.Model):
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
 
     profile = db.relationship('UserProfile', backref='logs')
+
+class KYCRecord(db.Model):
+    """Detailed KYC information retained for compliance."""
+    __tablename__ = 'kyc_records'
+    record_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.user_id'), nullable=False)
+    info_type = db.Column(db.String, nullable=False)
+    info_data = db.Column(db.String, nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    retention_until = db.Column(db.DateTime, nullable=False)
+
+    user = db.relationship('User', backref='kyc_records')
+
+class SuspiciousMatterReportEntry(db.Model):
+    """Record of submitted Suspicious Matter Reports."""
+    __tablename__ = 'suspicious_matter_reports'
+    smr_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.user_id'), nullable=False)
+    transaction_id = db.Column(db.Integer, db.ForeignKey('transactions.transaction_id'), nullable=True)
+    report_json = db.Column(db.String, nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    user = db.relationship('User', backref='smr_entries')
+    transaction = db.relationship('Transaction')
+
+class AMLLogEntry(db.Model):
+    """Audit log for AML related events."""
+    __tablename__ = 'aml_logs'
+    log_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.user_id'), nullable=True)
+    action = db.Column(db.String, nullable=False)
+    details = db.Column(db.String, nullable=True)
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+
+    user = db.relationship('User', backref='aml_logs')

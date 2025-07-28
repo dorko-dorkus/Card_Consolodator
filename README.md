@@ -330,3 +330,17 @@ beyond the single transaction threshold. The scheduler also alerts the
 compliance team when a user profile is flagged or remains in a pending KYC state
 for more than three days. Alerts are written to the `compliance` log for
 follow‑up.
+
+### Compliance record retention and export
+
+KYC records, Suspicious Matter Reports and AML log entries are stored for a
+minimum of seven years in the `kyc_records`, `suspicious_matter_reports` and
+`aml_logs` tables. Use the `export_compliance_records.py` utility in the
+`backend/app` directory to export CSV files for AUSTRAC audits:
+
+```bash
+python export_compliance_records.py --out-dir /tmp/exports
+```
+
+This will generate separate CSV files for each table containing all historical
+records.

@@ -4,7 +4,12 @@ from datetime import datetime
 
 from .kyc import get_user_profile, process_transaction
 
-from .models import db, Transaction
+from .models import (
+    db,
+    Transaction,
+    SuspiciousMatterReportEntry,
+    AMLLogEntry,
+)
 
 AUSTRAC_API_URL = os.getenv("AUSTRAC_API_URL", "https://api.austrac.gov.au/smr/submit")
 APP_ENTITY_ID = os.getenv("APP_ENTITY_ID", "APP_ENTITY")
@@ -56,6 +61,17 @@ def log_transaction(user_id: int, amount: float, transaction_type: str, stripe_p
     db.session.add(txn)
     db.session.commit()
 
+    # persist AML log entry
+    db.session.add(
+        AMLLogEntry(
+            user_id=user_id,
+            action="transaction_logged",
+            details=f"{transaction_type}:{amount}",
+            timestamp=txn.timestamp,
+        )
+    )
+    db.session.commit()
+
     # Update KYC/AML monitoring profile
     try:
         profile = get_user_profile(user_id)
@@ -88,6 +104,21 @@ def report_suspicious_activity(txn: Transaction) -> None:
     try:
         report = build_suspicious_matter_report(txn)
         result = submit_suspicious_matter_report(report)
+        db.session.add(
+            SuspiciousMatterReportEntry(
+                user_id=txn.user_id,
+                transaction_id=txn.transaction_id,
+                report_json=str(report),
+            )
+        )
+        db.session.add(
+            AMLLogEntry(
+                user_id=txn.user_id,
+                action="smr_submitted",
+                details=str(report),
+            )
+        )
+        db.session.commit()
         logger.info("SMR processed: %s", result)
     except Exception as exc:
         logger.error("SMR handling failed: %s", exc)
