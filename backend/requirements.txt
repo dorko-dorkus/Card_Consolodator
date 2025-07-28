@@ -12,3 +12,4 @@ pytest-mock
 Flask-Migrate
 alembic
 flask-limiter
+requests

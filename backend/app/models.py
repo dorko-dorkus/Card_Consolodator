@@ -63,3 +63,44 @@ class Transaction(db.Model):
     timestamp = db.Column(db.DateTime, nullable=True, default=datetime.utcnow)
 
     user = db.relationship("User", back_populates="transactions")
+
+class UserProfile(db.Model):
+    """Persistent profile for AML/KYC status."""
+    __tablename__ = 'user_profiles'
+    user_id = db.Column(db.Integer, db.ForeignKey('users.user_id'), primary_key=True)
+    verification_status = db.Column(db.String, nullable=False, default='not_verified')
+    veriff_session_id = db.Column(db.String, nullable=True)
+    flagged = db.Column(db.Boolean, default=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    user = db.relationship('User', backref=db.backref('profile', uselist=False))
+
+    # aliases for backward compatibility
+    @property
+    def kyc_status(self):
+        return self.verification_status
+
+    @kyc_status.setter
+    def kyc_status(self, value):
+        self.verification_status = value
+
+class IdentificationDocument(db.Model):
+    __tablename__ = 'identification_documents'
+    doc_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user_profiles.user_id'), nullable=False)
+    doc_type = db.Column(db.String, nullable=False)
+    file_path = db.Column(db.String, nullable=False)
+    uploaded_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    profile = db.relationship('UserProfile', backref='documents')
+
+class VerificationAuditLog(db.Model):
+    __tablename__ = 'verification_audit_logs'
+    log_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user_profiles.user_id'), nullable=False)
+    action = db.Column(db.String, nullable=False)
+    details = db.Column(db.String, nullable=True)
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+
+    profile = db.relationship('UserProfile', backref='logs')

@@ -32,3 +32,7 @@ class Config:
 
     # Global rate limit for the API, used by Flask-Limiter
     RATE_LIMIT = os.environ.get('RATE_LIMIT', '100/hour')
+    # Veriff configuration
+    VERIFF_API_KEY = os.environ.get("VERIFF_API_KEY")
+    VERIFF_BASE_URL = os.environ.get("VERIFF_BASE_URL", "https://api.veriff.me/v1")
+
