@@ -1,14 +1,14 @@
 import os
 import re
 import stripe
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, current_app
 from flask_limiter.errors import RateLimitExceeded
 from flask_login import login_user, logout_user, current_user, login_required
 from .__init__ import bcrypt, csrf
 from datetime import datetime
 from .config import Config
 
-from .models import db, GiftCard, PlatformGiftCard, User, Transaction, BankAccount
+from .models import db, GiftCard, PlatformGiftCard, User, BankAccount
 
 STRIPE_SECRET_KEY = os.getenv("STRIPE_SECRET_KEY", Config.STRIPE_SECRET_KEY)
 stripe.api_key = STRIPE_SECRET_KEY
@@ -269,16 +269,8 @@ def make_purchase():
     except stripe.error.StripeError as e:
         return jsonify({"error": str(e)}), 400
 
-    transaction = Transaction(
-        user_id=user_id,
-        transaction_type="Purchase",
-        amount=amount,
-        stripe_payment_id=stripe_id,
+    current_app.logger.info(
+        "purchase", extra={"user_id": user_id, "stripe_payment_id": stripe_id, "timestamp": datetime.utcnow().isoformat()}
     )
-    db.session.add(transaction)
-    db.session.commit()
 
-    return jsonify({
-        "message": "purchase successful",
-        "transaction_id": transaction.transaction_id,
-    })
+    return jsonify({"message": "purchase successful"})
