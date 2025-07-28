@@ -36,7 +36,6 @@ const HomeScreen = ({ navigation }) => {
       />
       <Button color={tint} title="Consolidate" onPress={() => navigation.navigate("Consolidate")} />
       <Button color={tint} title="Bank Accounts" onPress={() => navigation.navigate("BankAccounts")} />
-      <Button color={tint} title="Top Up" onPress={() => navigation.navigate("TopUp")} />
       <Button color={tint} title="Purchase" onPress={() => navigation.navigate("Purchase")} />
     </View>
   );

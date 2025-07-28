@@ -1,5 +1,5 @@
 process.env.BACKEND_URL = 'http://your-backend-url';
-const {fetchGiftCards, consolidateGiftCards, linkBankAccount, transferFromBank, makePurchase} = require('../api');
+const {fetchGiftCards, consolidateGiftCards, linkBankAccount, makePurchase} = require('../api');
 
 global.fetch = jest.fn();
 
@@ -38,17 +38,6 @@ test('linkBankAccount posts data', async () => {
   expect(data).toEqual({message:'linked'});
 });
 
-test('transferFromBank posts data', async () => {
-  fetch.mockResolvedValue({json: () => Promise.resolve({new_balance:10})});
-  const data = await transferFromBank(1, 2, 10);
-  expect(fetch).toHaveBeenCalledWith('http://your-backend-url/api/bank-accounts/transfer', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ user_id: 1, account_id: 2, amount: 10 }),
-    credentials: 'include',
-  });
-  expect(data).toEqual({new_balance:10});
-});
 
 test('makePurchase posts data', async () => {
   fetch.mockResolvedValue({json: () => Promise.resolve({remaining_balance:5})});
