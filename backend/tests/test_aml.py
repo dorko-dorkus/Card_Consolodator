@@ -38,6 +38,7 @@ def test_large_purchase_triggers_report(mocker, tmp_path):
     client.post("/api/login", json={"email": "u@example.com", "password": "pw"})
 
     spy = mocker.spy(aml, "report_suspicious_activity")
+    review_spy = mocker.spy(aml, "manual_review")
     post_mock = mocker.patch("requests.post")
 
     mocker.patch("app.routes.stripe.PaymentIntent.create", return_value=type("obj", (object,), {"id": "pi_lg"})())
@@ -49,5 +50,10 @@ def test_large_purchase_triggers_report(mocker, tmp_path):
     assert resp.status_code == 200
     assert spy.call_count == 1
     post_mock.assert_not_called()
+    review_spy.assert_called()
     with open(log_path) as f:
-        assert len(f.readlines()) == 1
+        lines = f.readlines()
+        assert len(lines) >= 1
+        import json
+        report = json.loads(lines[-1])
+        assert report["reason"] == "Amount exceeds threshold"

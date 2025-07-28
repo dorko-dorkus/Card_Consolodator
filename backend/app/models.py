@@ -124,6 +124,9 @@ class SuspiciousMatterReportEntry(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('users.user_id'), nullable=False)
     transaction_id = db.Column(db.Integer, db.ForeignKey('transactions.transaction_id'), nullable=True)
     report_json = db.Column(db.String, nullable=False)
+    reason = db.Column(db.String, nullable=True)
+    required_by = db.Column(db.DateTime, nullable=True)
+    submitted_at = db.Column(db.DateTime, nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     user = db.relationship('User', backref='smr_entries')

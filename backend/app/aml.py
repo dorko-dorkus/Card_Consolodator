@@ -1,6 +1,6 @@
 import logging
 import os
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from .kyc import get_user_profile, process_transaction
 
@@ -16,10 +16,12 @@ APP_ENTITY_ID = os.getenv("APP_ENTITY_ID", "APP_ENTITY")
 ENABLE_LIVE_SUBMISSION = os.getenv("ENABLE_LIVE_SUBMISSION", "false").lower() == "true"
 LOCAL_SM_LOG_PATH = os.getenv("LOCAL_SM_LOG_PATH", "suspicious_reports.log")
 
+SMR_DEADLINE_HOURS = int(os.getenv("SMR_DEADLINE_HOURS", "72"))
+
 AML_THRESHOLD = float(os.getenv("AML_THRESHOLD", "10000"))
 
 
-def build_suspicious_matter_report(txn: Transaction) -> dict:
+def build_suspicious_matter_report(txn: Transaction, reason: str) -> dict:
     """Create the payload for a Suspicious Matter Report."""
     return {
         "reporting_entity_id": APP_ENTITY_ID,
@@ -28,11 +30,21 @@ def build_suspicious_matter_report(txn: Transaction) -> dict:
         "timestamp": txn.timestamp.isoformat(),
         "amount": txn.amount,
         "transaction_type": txn.transaction_type,
+        "reason": reason,
     }
 
 
+def manual_review(report: dict) -> None:
+    """Persist the report for manual compliance review."""
+    with open(LOCAL_SM_LOG_PATH, "a") as fh:
+        import json
+
+        json.dump(report, fh)
+        fh.write("\n")
+
+
 def submit_suspicious_matter_report(report: dict) -> str:
-    """Submit the report to AUSTRAC or save it locally."""
+    """Submit the report to AUSTRAC or queue for manual review."""
     if ENABLE_LIVE_SUBMISSION:
         import requests
 
@@ -41,12 +53,8 @@ def submit_suspicious_matter_report(report: dict) -> str:
             raise RuntimeError("AUSTRAC SMR submission failed")
         return "Submitted"
     else:
-        with open(LOCAL_SM_LOG_PATH, "a") as fh:
-            import json
-
-            json.dump(report, fh)
-            fh.write("\n")
-        return "Saved locally for compliance review"
+        manual_review(report)
+        return "Pending manual review"
 
 
 def log_transaction(user_id: int, amount: float, transaction_type: str, stripe_payment_id: str | None = None) -> Transaction:
@@ -80,11 +88,11 @@ def log_transaction(user_id: int, amount: float, transaction_type: str, stripe_p
         logging.getLogger("aml").error("KYC processing failed: %s", exc)
 
     if amount >= AML_THRESHOLD:
-        report_suspicious_activity(txn)
+        report_suspicious_activity(txn, reason="Amount exceeds threshold")
     return txn
 
 
-def report_suspicious_activity(txn: Transaction) -> None:
+def report_suspicious_activity(txn: Transaction, reason: str) -> None:
     """Log a suspicious matter report entry.
 
     In production this would submit an SMR to AUSTRAC. Here we simply log a
@@ -98,23 +106,68 @@ def report_suspicious_activity(txn: Transaction) -> None:
             "user_id": txn.user_id,
             "amount": txn.amount,
             "timestamp": txn.timestamp.isoformat(),
+            "reason": reason,
         },
     )
 
     try:
-        report = build_suspicious_matter_report(txn)
+        report = build_suspicious_matter_report(txn, reason)
+        required_by = txn.timestamp + timedelta(hours=SMR_DEADLINE_HOURS)
+        if datetime.utcnow() > required_by:
+            raise RuntimeError("SMR submission overdue")
         result = submit_suspicious_matter_report(report)
         db.session.add(
             SuspiciousMatterReportEntry(
                 user_id=txn.user_id,
                 transaction_id=txn.transaction_id,
                 report_json=str(report),
+                reason=reason,
+                required_by=required_by,
+                submitted_at=datetime.utcnow() if ENABLE_LIVE_SUBMISSION else None,
             )
         )
         db.session.add(
             AMLLogEntry(
                 user_id=txn.user_id,
-                action="smr_submitted",
+                action="smr_submitted" if ENABLE_LIVE_SUBMISSION else "smr_queued",
+                details=str(report),
+            )
+        )
+        db.session.commit()
+        logger.info("SMR processed: %s", result)
+    except Exception as exc:
+        logger.error("SMR handling failed: %s", exc)
+
+
+def report_user_suspicion(user_id: int, reason: str) -> None:
+    """Log a suspicious matter report not tied to a transaction."""
+    logger = logging.getLogger("aml")
+    now = datetime.utcnow()
+    report = {
+        "reporting_entity_id": APP_ENTITY_ID,
+        "user_id": user_id,
+        "timestamp": now.isoformat(),
+        "reason": reason,
+    }
+    required_by = now + timedelta(hours=SMR_DEADLINE_HOURS)
+    try:
+        if datetime.utcnow() > required_by:
+            raise RuntimeError("SMR submission overdue")
+        result = submit_suspicious_matter_report(report)
+        db.session.add(
+            SuspiciousMatterReportEntry(
+                user_id=user_id,
+                transaction_id=None,
+                report_json=str(report),
+                reason=reason,
+                required_by=required_by,
+                submitted_at=datetime.utcnow() if ENABLE_LIVE_SUBMISSION else None,
+            )
+        )
+        db.session.add(
+            AMLLogEntry(
+                user_id=user_id,
+                action="smr_submitted" if ENABLE_LIVE_SUBMISSION else "smr_queued",
                 details=str(report),
             )
         )
