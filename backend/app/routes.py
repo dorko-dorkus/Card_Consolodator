@@ -1,7 +1,6 @@
 import os
 import re
 import stripe
-from .encryption_utils import encrypt_data
 from flask import Blueprint, request, jsonify
 from flask_limiter.errors import RateLimitExceeded
 from flask_login import login_user, logout_user, current_user, login_required
@@ -355,7 +354,6 @@ def make_purchase():
         user_id=user_id,
         transaction_type="Purchase",
         amount=amount,
-        details_encrypted=encrypt_data("Platform card purchase"),
         stripe_payment_id=",".join(stripe_ids) if stripe_ids else None,
     )
     db.session.add(transaction)
