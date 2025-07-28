@@ -309,3 +309,7 @@ For Linux or macOS users, a small wrapper script is provided. Run:
 
 This invokes `installer.py` using Python 3 to install all dependencies and build
 the backend executable.
+
+## Security and compliance
+
+For details on how user data is handled see [PRIVACY_POLICY.md](./PRIVACY_POLICY.md). If a security incident occurs refer to our [BREACH_RESPONSE_PLAN.md](./BREACH_RESPONSE_PLAN.md).
