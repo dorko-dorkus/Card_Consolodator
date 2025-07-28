@@ -191,7 +191,10 @@ encrypt sensitive data stored by the API.
 
 The server uses [Flask-CORS](https://flask-cors.readthedocs.io/) to allow
 cross-origin requests. Set the `CORS_ORIGINS` environment variable to a
-comma-separated list of allowed origins (defaults to `*`).
+comma-separated list of allowed origins. There is no default value and the
+wildcard `*` is rejected. In production, specify your frontend domains, for
+example `https://app.example.com`. For local development you might use
+`http://localhost:3000`.
 
 ### Logging and rate limiting
 
@@ -272,7 +275,7 @@ cp backend/.env.example backend/.env
 #   STRIPE_PUBLISHABLE_KEY
 #   STRIPE_WEBHOOK_SECRET
 #   ENCRYPTION_KEY
-#   CORS_ORIGINS
+#   CORS_ORIGINS  # e.g. https://app.example.com
 ```
 
 After creating the environment file, apply the migrations to set up the

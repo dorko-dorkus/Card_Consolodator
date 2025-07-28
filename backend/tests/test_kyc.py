@@ -4,6 +4,7 @@ os.environ.setdefault("STRIPE_PUBLISHABLE_KEY", "pk_test")
 os.environ.setdefault("STRIPE_WEBHOOK_SECRET", "whsec_test")
 os.environ.setdefault("DATABASE_URL", "sqlite:///:memory:")
 os.environ.setdefault("SECRET_KEY", "test")
+os.environ.setdefault("CORS_ORIGINS", "http://localhost")
 
 from app.__init__ import create_app, db, bcrypt
 from app.models import User, UserProfile

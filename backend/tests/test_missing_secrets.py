@@ -24,6 +24,7 @@ def test_create_app_fails_without_required_env(monkeypatch, missing_key):
     monkeypatch.setenv("STRIPE_SECRET_KEY", "sk")
     monkeypatch.setenv("STRIPE_PUBLISHABLE_KEY", "pk")
     monkeypatch.setenv("STRIPE_WEBHOOK_SECRET", "wh")
+    monkeypatch.setenv("CORS_ORIGINS", "http://localhost")
     monkeypatch.delenv(missing_key, raising=False)
 
     with pytest.raises(RuntimeError):

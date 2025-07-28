@@ -39,8 +39,14 @@ class Config:
     ):
         raise RuntimeError('Stripe keys must be configured for production')
 
-    # Comma-separated list of origins allowed to access the API
-    CORS_ORIGINS = os.environ.get('CORS_ORIGINS', '*')
+    # Comma-separated list of origins allowed to access the API. A value must be
+    # provided and the wildcard "*" is disallowed to prevent an overly permissive
+    # policy.
+    CORS_ORIGINS = os.environ.get('CORS_ORIGINS')
+    if not CORS_ORIGINS or CORS_ORIGINS.strip() == '*':
+        raise RuntimeError(
+            'CORS_ORIGINS environment variable must specify allowed origins'
+        )
 
     # Global rate limit for the API, used by Flask-Limiter
     RATE_LIMIT = os.environ.get('RATE_LIMIT', '100/hour')
