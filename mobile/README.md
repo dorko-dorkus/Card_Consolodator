@@ -21,6 +21,12 @@ The app now starts on a **Login** screen. Provide your registered email and
 password and press **Login**.  On success you will be taken to the home screen
 which fetches session information from the backend.
 
+From the home screen you can navigate to additional flows:
+
+- **Gift Cards** – lists the user's gift cards and offers a button to consolidate them.
+- **Link Bank Account** – allows submitting a bank token to link via the backend.
+- **Make Purchase** – submit an amount and payment token to create a purchase.
+
 Ensure the backend server is running and accessible before attempting to log in.
 
 ### Configuring the backend URL

@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, Button } from 'react-native';
 import { sessionInfo } from './api';
 
-const HomeScreen = () => {
+const HomeScreen = ({ navigation }) => {
   const [userId, setUserId] = useState(null);
 
   useEffect(() => {
@@ -18,7 +18,21 @@ const HomeScreen = () => {
   return (
     <View style={styles.container}>
       {userId ? (
-        <Text style={styles.text}>Welcome, user {userId}!</Text>
+        <>
+          <Text style={styles.text}>Welcome, user {userId}!</Text>
+          <Button
+            title="View Gift Cards"
+            onPress={() => navigation.navigate('GiftCards')}
+          />
+          <Button
+            title="Link Bank Account"
+            onPress={() => navigation.navigate('BankLink')}
+          />
+          <Button
+            title="Make Purchase"
+            onPress={() => navigation.navigate('Purchase')}
+          />
+        </>
       ) : (
         <Text style={styles.text}>Loading...</Text>
       )}
