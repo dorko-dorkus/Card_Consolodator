@@ -6,6 +6,7 @@ from flask_limiter.errors import RateLimitExceeded
 from flask_login import login_user, logout_user, current_user, login_required
 from .__init__ import bcrypt, csrf
 from .aml import log_transaction
+from .stripeUtils import issue_virtual_card
 from datetime import datetime
 from .config import Config
 
@@ -192,6 +193,53 @@ def add_gift_card():
     db.session.add(new_card)
     db.session.commit()
     return jsonify({"message": "card added", "card_id": new_card.card_id}), 201
+
+
+@api_bp.route("/consolidate", methods=["POST"])
+@login_required
+def consolidate_cards():
+    """Consolidate a user's gift cards onto a platform card."""
+    data = request.get_json() or {}
+    user_id = data.get("user_id")
+    try:
+        user_id = int(user_id)
+    except (TypeError, ValueError):
+        return jsonify({"error": "Invalid user_id"}), 400
+    if user_id != current_user.user_id:
+        return jsonify({"error": "forbidden"}), 403
+
+    user = db.session.get(User, user_id)
+    if not user:
+        return jsonify({"error": "User not found"}), 404
+
+    cards = GiftCard.query.filter_by(user_id=user_id, is_active=True).all()
+    if not cards:
+        return jsonify({"error": "No active cards"}), 400
+
+    platform_card = PlatformGiftCard.query.filter_by(user_id=user_id).first()
+    if not platform_card:
+        try:
+            virt = issue_virtual_card(user.name, user.email)
+            platform_card = PlatformGiftCard(
+                user_id=user_id, stripe_card_id=getattr(virt, "id", None)
+            )
+            db.session.add(platform_card)
+        except Exception as e:  # pragma: no cover - stripe failure
+            return jsonify({"error": str(e)}), 400
+
+    for card in cards:
+        card.is_active = False
+
+    db.session.commit()
+    log_transaction(user_id=user_id, amount=0.0, transaction_type="consolidate")
+
+    return jsonify(
+        {
+            "message": "consolidation complete",
+            "platform_card_id": platform_card.card_id,
+            "deactivated": len(cards),
+        }
+    )
 
 
 
