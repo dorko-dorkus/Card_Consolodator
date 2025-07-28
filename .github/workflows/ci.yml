@@ -45,11 +45,9 @@ jobs:
           npm test --if-present
 
       - name: Install mobile dependencies
-        run: |
-          cd mobile
-          npm ci
+        working-directory: mobile
+        run: npm ci
 
       - name: Run mobile tests
-        run: |
-          cd mobile
-          npm test --if-present
+        working-directory: mobile
+        run: npm test
