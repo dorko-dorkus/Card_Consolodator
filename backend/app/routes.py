@@ -290,17 +290,23 @@ def link_bank_account():
 @api_bp.route("/purchase", methods=["POST"])
 @login_required
 def make_purchase():
-    """Charge a user's consolidated balance toward a purchase."""
+    """Charge a user's consolidated balance toward a purchase.
+
+    Supports split tender transactions by charging the platform gift card first
+    and the remainder to an additional payment token if provided.
+    """
+
     data = request.get_json() or {}
     user_id = data.get("user_id")
     amount = data.get("amount")
+    payment_token = data.get("payment_token")
 
     try:
         user_id = int(user_id)
     except (TypeError, ValueError):
         return jsonify({"error": "Invalid user_id"}), 400
 
-    if not all([user_id, amount]):
+    if user_id is None or amount is None:
         return jsonify({"error": "Missing required fields"}), 400
 
     try:
@@ -309,30 +315,48 @@ def make_purchase():
         return jsonify({"error": "Invalid amount"}), 400
 
     platform_card = PlatformGiftCard.query.filter_by(user_id=user_id).first()
-    if not platform_card or platform_card.balance < amount:
+    if not platform_card:
         return jsonify({"error": "Insufficient balance"}), 400
 
-    stripe_payment_id = None
-    if platform_card.stripe_card_id:
+    gift_amount = min(platform_card.balance, amount)
+    card_amount = amount - gift_amount
+
+    stripe_ids = []
+
+    if gift_amount > 0 and platform_card.stripe_card_id:
         try:
             intent = stripe.PaymentIntent.create(
-                amount=int(amount * 100),
+                amount=int(gift_amount * 100),
                 currency="usd",
                 payment_method=platform_card.stripe_card_id,
                 confirm=True,
             )
-            stripe_payment_id = intent.id
+            stripe_ids.append(intent.id)
         except stripe.error.StripeError as e:
             return jsonify({"error": str(e)}), 400
 
-    platform_card.balance -= amount
+    if card_amount > 0:
+        if not payment_token:
+            return jsonify({"error": "Insufficient balance"}), 400
+        try:
+            intent = stripe.PaymentIntent.create(
+                amount=int(card_amount * 100),
+                currency="usd",
+                payment_method=payment_token,
+                confirm=True,
+            )
+            stripe_ids.append(intent.id)
+        except stripe.error.StripeError as e:
+            return jsonify({"error": str(e)}), 400
+
+    platform_card.balance -= gift_amount
 
     transaction = Transaction(
         user_id=user_id,
         transaction_type="Purchase",
         amount=amount,
         details_encrypted=encrypt_data("Platform card purchase"),
-        stripe_payment_id=stripe_payment_id,
+        stripe_payment_id=",".join(stripe_ids) if stripe_ids else None,
     )
     db.session.add(transaction)
     db.session.commit()

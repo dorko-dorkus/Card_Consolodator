@@ -37,7 +37,7 @@ def test_purchase_success(mocker):
 
     mocker.patch("app.routes.stripe.PaymentIntent.create", return_value=type('obj', (object,), {'id': 'pi_789'})())
 
-    resp = client.post('/api/purchase', json={'user_id': user_id, 'amount': 15})
+    resp = client.post('/api/purchase', json={'user_id': user_id, 'amount': 15, 'payment_token': 'pm_card'})
     assert resp.status_code == 200
     data = resp.get_json()
     assert data['remaining_balance'] == 5
@@ -77,5 +77,37 @@ def test_purchase_requires_login():
         db.session.commit()
     resp = client.post('/api/purchase', json={'user_id': user_id, 'amount': 3})
     assert resp.status_code == 302
+
+
+def test_purchase_split_tender(mocker):
+    app = setup_app()
+    user_id = create_user(app)
+    client = app.test_client()
+    client.post('/api/login', json={'email': 'u@example.com', 'password': 'pw'})
+
+    with app.app_context():
+        card = PlatformGiftCard(user_id=user_id, balance=5, stripe_card_id="pm_123")
+        db.session.add(card)
+        db.session.commit()
+
+    mocker.patch(
+        "app.routes.stripe.PaymentIntent.create",
+        side_effect=[type('obj', (object,), {'id': 'pi_gc'})(), type('obj', (object,), {'id': 'pi_card'})()]
+    )
+
+    resp = client.post(
+        '/api/purchase',
+        json={'user_id': user_id, 'amount': 10, 'payment_token': 'pm_card'}
+    )
+    assert resp.status_code == 200
+    data = resp.get_json()
+    assert data['remaining_balance'] == 0
+
+    with app.app_context():
+        platform = PlatformGiftCard.query.filter_by(user_id=user_id).first()
+        assert platform.balance == 0
+        txns = Transaction.query.filter_by(user_id=user_id).all()
+        assert len(txns) == 1
+        assert txns[0].stripe_payment_id == 'pi_gc,pi_card'
 
 

@@ -1,6 +1,7 @@
 import React, { useState, useContext } from "react";
 import { View, TextInput, Button, StyleSheet } from "react-native";
 import { makePurchase } from "./api";
+import { getItem } from "./SecureStore";
 import { ThemedText } from "./ThemedText";
 import { useColorScheme } from "./hooks/useColorScheme";
 import { Colors } from "./constants/Colors";
@@ -15,7 +16,12 @@ const PurchaseScreen = () => {
 
   const handlePurchase = async () => {
     if (!user) return;
-    const result = await makePurchase(user.user_id, parseFloat(amount));
+    const token = await getItem("last_payment_method");
+    const result = await makePurchase(
+      user.user_id,
+      parseFloat(amount),
+      token || undefined
+    );
     if (result?.remaining_balance !== undefined) {
       setMessage(`Remaining balance: $${result.remaining_balance}`);
     } else if (result?.error) {
