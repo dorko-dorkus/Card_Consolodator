@@ -2,7 +2,7 @@ from flask import Blueprint, request, jsonify
 from .__init__ import csrf
 import stripe
 import os
-from .models import db, PlatformGiftCard, User
+
 from .config import Config
 
 webhooks_bp = Blueprint('webhooks', __name__)
@@ -30,23 +30,9 @@ def stripe_webhook():
     
     if event['type'] == 'payment_intent.succeeded':
         payment_intent = event['data']['object']
-        user_id = int(payment_intent['metadata']['user_id'])
+        user_id = payment_intent['metadata'].get('user_id')
         amount = payment_intent['amount_received'] / 100
-        
-        user = db.session.get(User, user_id)
-        if not user:
-            return jsonify({"error": "User not found"}), 400
-        
-        # Update user's platform gift card balance
-        platform_card = PlatformGiftCard.query.filter_by(user_id=user_id).first()
-        if platform_card:
-            platform_card.balance += amount
-        else:
-            platform_card = PlatformGiftCard(user_id=user_id, balance=amount)
-            db.session.add(platform_card)
-        
-        db.session.commit()
-        print(f"Payment succeeded for User {user_id}: ${amount}. Updated balance: ${platform_card.balance}")
+        print(f"Payment succeeded for User {user_id}: ${amount}")
     
     elif event['type'] == 'issuing_card.created':
         card = event['data']['object']
