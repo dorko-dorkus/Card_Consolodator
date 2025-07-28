@@ -1,13 +1,16 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Button, StyleSheet } from 'react-native';
+import { View, Text, TextInput, Button, StyleSheet, ActivityIndicator } from 'react-native';
+import { COLORS, SPACING, FONT_SIZES } from './theme';
 import { loginUser, sessionInfo } from './api';
 
 const LoginScreen = ({ navigation }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [message, setMessage] = useState('');
+  const [loading, setLoading] = useState(false);
 
   const handleLogin = async () => {
+    setLoading(true);
     const res = await loginUser(email, password);
     if (res?.error) {
       setMessage(res.error);
@@ -19,6 +22,7 @@ const LoginScreen = ({ navigation }) => {
         setMessage('Login failed');
       }
     }
+    setLoading(false);
   };
 
   return (
@@ -37,7 +41,11 @@ const LoginScreen = ({ navigation }) => {
         secureTextEntry
         style={styles.input}
       />
-      <Button title="Login" onPress={handleLogin} />
+      {loading ? (
+        <ActivityIndicator size="large" color={COLORS.primary} />
+      ) : (
+        <Button title="Login" onPress={handleLogin} />
+      )}
       {message ? <Text style={styles.message}>{message}</Text> : null}
     </View>
   );
@@ -48,25 +56,27 @@ export default LoginScreen;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
+    padding: SPACING,
     justifyContent: 'center',
-    backgroundColor: '#fff',
+    backgroundColor: COLORS.background,
   },
   title: {
-    fontSize: 24,
+    fontSize: FONT_SIZES.title,
     fontWeight: 'bold',
-    marginBottom: 20,
+    marginBottom: SPACING,
     textAlign: 'center',
+    color: COLORS.text,
   },
   input: {
     borderWidth: 1,
-    borderColor: '#ccc',
-    padding: 8,
-    marginVertical: 10,
+    borderColor: COLORS.border,
+    padding: SPACING / 2,
+    marginVertical: SPACING / 2,
     borderRadius: 6,
   },
   message: {
-    marginTop: 20,
+    marginTop: SPACING,
     textAlign: 'center',
+    color: COLORS.text,
   },
 });
