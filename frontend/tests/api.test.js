@@ -1,5 +1,5 @@
 process.env.BACKEND_URL = 'http://your-backend-url';
-const {fetchGiftCards, consolidateGiftCards, linkBankAccount, makePurchase} = require('../api');
+const {fetchGiftCards, consolidateGiftCards, linkBankAccount, makePurchase, deleteAccount} = require('../api');
 
 global.fetch = jest.fn();
 
@@ -49,4 +49,14 @@ test('makePurchase posts data', async () => {
     credentials: 'include',
   });
   expect(data).toEqual({message:'purchase successful'});
+});
+
+test('deleteAccount sends delete', async () => {
+  fetch.mockResolvedValue({json: () => Promise.resolve({message:'account deleted'})});
+  const data = await deleteAccount(3);
+  expect(fetch).toHaveBeenCalledWith('http://your-backend-url/api/users/3', {
+    method: 'DELETE',
+    credentials: 'include',
+  });
+  expect(data).toEqual({message:'account deleted'});
 });

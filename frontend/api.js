@@ -113,3 +113,16 @@ export const sessionInfo = async () => {
     return null;
   }
 };
+
+export const deleteAccount = async (userId) => {
+  try {
+    const res = await fetch(`${API_URL}/users/${userId}`, {
+      method: 'DELETE',
+      credentials: 'include',
+    });
+    return await res.json();
+  } catch (error) {
+    console.error('Error deleting account:', error);
+    return null;
+  }
+};

@@ -9,7 +9,14 @@ from .aml import log_transaction
 from datetime import datetime
 from .config import Config
 
-from .models import db, GiftCard, PlatformGiftCard, User, BankAccount
+from .models import (
+    db,
+    GiftCard,
+    PlatformGiftCard,
+    User,
+    BankAccount,
+    Transaction,
+)
 
 STRIPE_SECRET_KEY = os.getenv("STRIPE_SECRET_KEY", Config.STRIPE_SECRET_KEY)
 stripe.api_key = STRIPE_SECRET_KEY
@@ -277,3 +284,24 @@ def make_purchase():
     log_transaction(user_id=user_id, amount=amount, transaction_type="purchase", stripe_payment_id=stripe_id)
 
     return jsonify({"message": "purchase successful"})
+
+
+@api_bp.route("/users/<int:user_id>", methods=["DELETE"])
+@login_required
+def delete_account(user_id):
+    """Delete the authenticated user's account and related data."""
+    if user_id != current_user.user_id:
+        return jsonify({"error": "forbidden"}), 403
+
+    user = db.session.get(User, user_id)
+    if not user:
+        return jsonify({"error": "User not found"}), 404
+
+    GiftCard.query.filter_by(user_id=user_id).delete()
+    PlatformGiftCard.query.filter_by(user_id=user_id).delete()
+    BankAccount.query.filter_by(user_id=user_id).delete()
+    Transaction.query.filter_by(user_id=user_id).delete()
+    db.session.delete(user)
+    db.session.commit()
+    logout_user()
+    return jsonify({"message": "account deleted"})
