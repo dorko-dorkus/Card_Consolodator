@@ -21,7 +21,13 @@ Each part can be run and developed independently.
    export STRIPE_PUBLISHABLE_KEY=your-publishable-key
    ```
 
-3. Start the app
+3. (Optional) Provide a tokenizer secret
+
+   ```bash
+   export TOKENIZER_SECRET=my-secret-value
+   ```
+
+4. Start the app
 
    ```bash
     npx expo start
@@ -53,6 +59,15 @@ using `expo-secure-store`. Storing these values in the device keychain keeps
 credentials out of the codebase and adds a layer of security. You can also
 provide a `STRIPE_PUBLISHABLE_KEY` environment variable when starting the app;
 the value will be used before falling back to the stored credentials.
+
+The tokenization helper (`tokenizer.js`) now mixes in a secret or random salt
+when generating hashes. Set `TOKENIZER_SECRET` in your environment to supply a
+stable secret:
+
+```bash
+export TOKENIZER_SECRET=my-secret-value
+```
+If the variable is omitted a random salt is generated for each token.
 
 All payment flows additionally use a small client-side tokenization helper
 (`tokenizer.js`) which hashes sensitive values before they are sent to the
