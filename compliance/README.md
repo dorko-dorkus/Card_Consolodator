@@ -19,5 +19,7 @@ See [PRIVACY_POLICY.md](../PRIVACY_POLICY.md) and [BREACH_RESPONSE_PLAN.md](../B
 The application previously included card storage and balance top‑up capabilities. These features have been **removed** to reduce compliance scope. No card numbers or bank account details are persisted.
 
 ## Compliance Documents
+The 2024 SAQ A Questionnaire and Attestation of Compliance are version-controlled in this folder and updated annually.
+
 - [SAQ A Questionnaire](SAQ_A_Questionnaire.pdf)
 - [Attestation of Compliance](Attestation_of_Compliance.pdf)

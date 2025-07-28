@@ -313,3 +313,4 @@ the backend executable.
 ## Security and compliance
 
 For details on how user data is handled see [PRIVACY_POLICY.md](./PRIVACY_POLICY.md). If a security incident occurs refer to our [BREACH_RESPONSE_PLAN.md](./BREACH_RESPONSE_PLAN.md).
+The [compliance](./compliance) directory contains the current SAQ A Questionnaire and Attestation of Compliance PDFs, version-controlled for audit purposes.
