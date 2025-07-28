@@ -40,3 +40,24 @@ BACKEND_URL="http://192.168.1.42:8000" npx expo start
 ```
 
 This value is read in `api.js` and used as the base URL for all network calls.
+
+### Running tests
+
+Run the Jest test suite with:
+
+```bash
+npm test
+```
+
+### Building a release
+
+Install the EAS CLI and build for Android or iOS:
+
+```bash
+npm install -g eas-cli
+eas login
+eas build --platform android  # or ios
+```
+
+Provide environment variables such as `BACKEND_URL` or `STRIPE_PUBLISHABLE_KEY`
+via an `eas.json` profile or `--env` flags when building.
