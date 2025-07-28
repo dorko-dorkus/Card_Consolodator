@@ -46,6 +46,18 @@ def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)
 
+    required_keys = {
+        'SECRET_KEY': 'your_secret_key_here',
+        'STRIPE_SECRET_KEY': 'your_stripe_secret_key_here',
+        'STRIPE_PUBLISHABLE_KEY': 'your_stripe_publishable_key_here',
+        'STRIPE_WEBHOOK_SECRET': 'your_stripe_webhook_secret_here',
+    }
+
+    for key, placeholder in required_keys.items():
+        value = os.environ.get(key, app.config.get(key))
+        if not value or value == placeholder:
+            raise RuntimeError(f"{key} environment variable is required")
+
     # Configure logging to stdout or a file
     log_file = os.getenv("LOG_FILE")
     log_level = os.getenv("LOG_LEVEL", "INFO").upper()

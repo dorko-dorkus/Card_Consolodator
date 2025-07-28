@@ -3,6 +3,8 @@ import builtins
 import pytest
 
 os.environ.setdefault("STRIPE_SECRET_KEY", "sk_test")
+os.environ.setdefault("STRIPE_PUBLISHABLE_KEY", "pk_test")
+os.environ.setdefault("STRIPE_WEBHOOK_SECRET", "whsec_test")
 
 from app.encryption_utils import encrypt_data, decrypt_data
 from app.routes import create_payment_intent, verify_payment

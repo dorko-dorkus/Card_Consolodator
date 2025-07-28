@@ -2,6 +2,8 @@ import os
 import pytest
 
 os.environ.setdefault("STRIPE_SECRET_KEY", "sk_test")
+os.environ.setdefault("STRIPE_PUBLISHABLE_KEY", "pk_test")
+os.environ.setdefault("STRIPE_WEBHOOK_SECRET", "whsec_test")
 os.environ.setdefault("DATABASE_URL", "sqlite:///:memory:")
 os.environ.setdefault("SECRET_KEY", "test")
 
