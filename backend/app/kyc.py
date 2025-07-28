@@ -1,7 +1,13 @@
 import logging
 from datetime import datetime, timedelta
 
-from .models import db, UserProfile as ProfileModel, VerificationAuditLog
+from .models import (
+    db,
+    UserProfile as ProfileModel,
+    VerificationAuditLog,
+    KYCRecord,
+    AMLLogEntry,
+)
 from .veriff_service import create_verification_session
 
 MAX_DAILY_TXN_LIMIT = 1000  # AUD
@@ -84,6 +90,7 @@ def trigger_kyc(user: UserProfile, reason: str):
         db.session.add(VerificationAuditLog(user_id=user.user_id, action="kyc_triggered", details=reason))
         db.session.commit()
         send_kyc_request(user, reason)
+        store_kyc_information(user.user_id, "kyc_trigger", reason)
 
 
 def detect_structuring(user: UserProfile) -> bool:
@@ -98,6 +105,7 @@ def flag_suspicious(user: UserProfile, reason: str):
     user.db_profile.flagged = True
     db.session.add(VerificationAuditLog(user_id=user.user_id, action="flagged", details=reason))
     db.session.commit()
+    store_kyc_information(user.user_id, "flagged", reason)
     submit_au_strac_smr(user, reason)
 
 
@@ -116,6 +124,26 @@ def send_kyc_request(user: UserProfile, reason: str) -> None:
 
 def submit_au_strac_smr(user: UserProfile, reason: str) -> None:
     log(f"SMR submitted for {user.user_id}: {reason}")
+
+
+def store_kyc_information(user_id: int, info_type: str, info_data: str) -> None:
+    """Persist KYC data with a 7 year retention period."""
+    retention = datetime.utcnow() + timedelta(days=365 * 7)
+    record = KYCRecord(
+        user_id=user_id,
+        info_type=info_type,
+        info_data=info_data,
+        retention_until=retention,
+    )
+    db.session.add(record)
+    db.session.add(
+        AMLLogEntry(
+            user_id=user_id,
+            action="kyc_recorded",
+            details=info_type,
+        )
+    )
+    db.session.commit()
 
 
 def warn_user(user: UserProfile, message: str) -> None:
