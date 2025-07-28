@@ -118,6 +118,25 @@ python run.py
 gunicorn wsgi:app
 ```
 
+## Running tests
+
+Each part of the project includes automated tests. To run them locally you will
+need Python and Node.js installed.
+
+```bash
+# Backend tests
+cd backend
+pytest
+
+# Frontend tests
+cd ../frontend
+npm test
+
+# Mobile tests
+cd ../mobile
+npm test
+```
+
 ### Docker
 
 You can build the API server into a container using the provided Dockerfile:
