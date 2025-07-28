@@ -7,7 +7,7 @@ import { Colors } from "./constants/Colors";
 import { AuthContext } from "./AuthContext";
 
 const HomeScreen = ({ navigation }) => {
-  const { user } = useContext(AuthContext);
+  const { user, logout } = useContext(AuthContext);
   const [giftCards, setGiftCards] = useState([]);
   const theme = useColorScheme() ?? "light";
   const tint = Colors[theme].tint;
@@ -16,7 +16,7 @@ const HomeScreen = ({ navigation }) => {
     const loadGiftCards = async () => {
       if (!user) return;
       const data = await fetchGiftCards(user.user_id);
-      setGiftCards(data);
+      setGiftCards(Array.isArray(data) ? data : []);
     };
     loadGiftCards();
   }, [user]);
@@ -24,19 +24,42 @@ const HomeScreen = ({ navigation }) => {
   return (
     <View style={[styles.container, { backgroundColor: Colors[theme].background }]}>
       <ThemedText style={styles.title}>Your Gift Cards</ThemedText>
+      <ThemedText style={styles.subtitle}>
+        Total cards: {giftCards.length}
+      </ThemedText>
       <FlatList
         data={giftCards}
         keyExtractor={(item) => item.card_id.toString()}
         renderItem={({ item }) => (
-          <View style={[styles.cardItem, {backgroundColor: theme === "light" ? "#fff" : "#1e1e1e"}] }>
+          <View
+            style={[
+              styles.cardItem,
+              { backgroundColor: theme === "light" ? "#fff" : "#1e1e1e" },
+            ]}
+          >
             <ThemedText>Token: {item.card_token}</ThemedText>
-            <ThemedText>Balance: ${item.balance.toFixed(2)}</ThemedText>
+            {item.expiry_date && (
+              <ThemedText>Expires: {item.expiry_date}</ThemedText>
+            )}
           </View>
         )}
       />
-      <Button color={tint} title="Consolidate" onPress={() => navigation.navigate("Consolidate")} />
-      <Button color={tint} title="Bank Accounts" onPress={() => navigation.navigate("BankAccounts")} />
-      <Button color={tint} title="Purchase" onPress={() => navigation.navigate("Purchase")} />
+      <Button
+        color={tint}
+        title="Consolidate"
+        onPress={() => navigation.navigate("Consolidate")}
+      />
+      <Button
+        color={tint}
+        title="Bank Accounts"
+        onPress={() => navigation.navigate("BankAccounts")}
+      />
+      <Button
+        color={tint}
+        title="Purchase"
+        onPress={() => navigation.navigate("Purchase")}
+      />
+      <Button color={tint} title="Logout" onPress={logout} />
     </View>
   );
 };
@@ -61,5 +84,8 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.05,
     shadowRadius: 4,
     elevation: 2,
+  },
+  subtitle: {
+    marginBottom: 8,
   },
 });

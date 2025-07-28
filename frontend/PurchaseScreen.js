@@ -16,12 +16,13 @@ const PurchaseScreen = () => {
 
   const handlePurchase = async () => {
     if (!user) return;
+    const amt = parseFloat(amount);
+    if (isNaN(amt) || amt <= 0) {
+      setMessage("Enter a valid amount");
+      return;
+    }
     const token = await getItem("last_payment_method");
-    const result = await makePurchase(
-      user.user_id,
-      parseFloat(amount),
-      token || undefined
-    );
+    const result = await makePurchase(user.user_id, amt, token || undefined);
     if (result?.message) {
       setMessage(result.message);
     } else if (result?.error) {

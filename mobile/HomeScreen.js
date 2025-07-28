@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, Button } from 'react-native';
-import { sessionInfo } from './api';
+import { sessionInfo, logoutUser } from './api';
 
 const HomeScreen = ({ navigation }) => {
   const [userId, setUserId] = useState(null);
@@ -31,6 +31,13 @@ const HomeScreen = ({ navigation }) => {
           <Button
             title="Make Purchase"
             onPress={() => navigation.navigate('Purchase')}
+          />
+          <Button
+            title="Logout"
+            onPress={async () => {
+              await logoutUser();
+              navigation.replace('Login');
+            }}
           />
         </>
       ) : (

@@ -18,7 +18,11 @@ const BankLinkScreen = () => {
   }, []);
 
   const handleLink = async () => {
-    if (!userId || !bankToken) return;
+    if (!userId) return;
+    if (!bankToken) {
+      setMessage('Enter bank token');
+      return;
+    }
     const res = await linkBankAccount(userId, bankToken);
     if (res?.message) {
       setMessage(res.message);

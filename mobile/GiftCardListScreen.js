@@ -34,6 +34,8 @@ const GiftCardListScreen = () => {
       loadCards(userId);
     } else if (res?.error) {
       setMessage(res.error);
+    } else {
+      setMessage('Consolidation failed');
     }
   };
 
