@@ -27,7 +27,7 @@ export const consolidateGiftCards = async (userId) => {
     return await response.json();
   } catch (error) {
     console.error("Error consolidating gift cards:", error);
-    return null;
+    return { error: "network_error" };
   }
 };
 
@@ -42,7 +42,7 @@ export const linkBankAccount = async (userId, bankToken) => {
     return await response.json();
   } catch (error) {
     console.error("Error linking bank account:", error);
-    return null;
+    return { error: "network_error" };
   }
 };
 
@@ -62,7 +62,7 @@ export const makePurchase = async (userId, amount, paymentToken) => {
     return await response.json();
   } catch (error) {
     console.error("Error making purchase:", error);
-    return null;
+    return { error: "network_error" };
   }
 };
 

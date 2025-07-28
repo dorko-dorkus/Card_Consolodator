@@ -21,6 +21,10 @@ const ConsolidationScreen = ({ navigation }) => {
     setLoading(false);
     if (result?.message) {
       setMessage(result.message);
+    } else if (result?.error) {
+      setMessage(result.error);
+    } else {
+      setMessage("Consolidation failed");
     }
   };
 
