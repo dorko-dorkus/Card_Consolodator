@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, Button, StyleSheet } from 'react-native';
+import { View, Text, FlatList, Button, StyleSheet, ActivityIndicator } from 'react-native';
 import { fetchGiftCards, consolidateGiftCards, sessionInfo } from './api';
+import { COLORS, SPACING, FONT_SIZES } from './theme';
 
 const GiftCardListScreen = () => {
   const [userId, setUserId] = useState(null);
@@ -41,20 +42,22 @@ const GiftCardListScreen = () => {
 
   const renderItem = ({ item }) => (
     <View style={styles.cardItem}>
-      <Text>Card ID: {item.card_id}</Text>
-      <Text>Token: {item.card_token}</Text>
-      <Text>Expiry: {item.expiry_date}</Text>
+      <Text style={styles.cardText}>Card ID: {item.card_id}</Text>
+      <Text style={styles.cardText}>Token: {item.card_token}</Text>
+      <Text style={styles.cardText}>Expiry: {item.expiry_date}</Text>
     </View>
   );
 
   return (
     <View style={styles.container}>
-      {loading ? <Text>Loading...</Text> : (
+      {loading ? (
+        <ActivityIndicator size="large" color={COLORS.primary} />
+      ) : (
         <FlatList
           data={cards}
           keyExtractor={(item) => item.card_id.toString()}
           renderItem={renderItem}
-          ListEmptyComponent={<Text>No gift cards found.</Text>}
+          ListEmptyComponent={<Text style={styles.cardText}>No gift cards found.</Text>}
         />
       )}
       <Button title="Consolidate Cards" onPress={handleConsolidate} />
@@ -66,7 +69,23 @@ const GiftCardListScreen = () => {
 export default GiftCardListScreen;
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 20 },
-  cardItem: { padding: 10, borderBottomWidth: 1, borderColor: '#ccc' },
-  message: { marginTop: 10, textAlign: 'center' },
+  container: {
+    flex: 1,
+    padding: SPACING,
+    backgroundColor: COLORS.background,
+  },
+  cardItem: {
+    padding: SPACING / 2,
+    borderBottomWidth: 1,
+    borderColor: COLORS.border,
+  },
+  cardText: {
+    fontSize: FONT_SIZES.text,
+    color: COLORS.text,
+  },
+  message: {
+    marginTop: SPACING,
+    textAlign: 'center',
+    color: COLORS.text,
+  },
 });

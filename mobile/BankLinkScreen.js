@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, TextInput, Button, StyleSheet } from 'react-native';
+import { View, Text, TextInput, Button, StyleSheet, ActivityIndicator } from 'react-native';
 import { linkBankAccount, sessionInfo } from './api';
+import { COLORS, SPACING, FONT_SIZES } from './theme';
 
 const BankLinkScreen = () => {
   const [userId, setUserId] = useState(null);
   const [bankToken, setBankToken] = useState('');
   const [message, setMessage] = useState('');
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const loadSession = async () => {
@@ -23,12 +25,14 @@ const BankLinkScreen = () => {
       setMessage('Enter bank token');
       return;
     }
+    setLoading(true);
     const res = await linkBankAccount(userId, bankToken);
     if (res?.message) {
       setMessage(res.message);
     } else if (res?.error) {
       setMessage(res.error);
     }
+    setLoading(false);
   };
 
   return (
@@ -40,7 +44,11 @@ const BankLinkScreen = () => {
         onChangeText={setBankToken}
         style={styles.input}
       />
-      <Button title="Link" onPress={handleLink} />
+      {loading ? (
+        <ActivityIndicator size="large" color={COLORS.primary} />
+      ) : (
+        <Button title="Link" onPress={handleLink} />
+      )}
       {message ? <Text style={styles.message}>{message}</Text> : null}
     </View>
   );
@@ -49,8 +57,27 @@ const BankLinkScreen = () => {
 export default BankLinkScreen;
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 20, backgroundColor: '#fff' },
-  title: { fontSize: 20, marginBottom: 10, textAlign: 'center' },
-  input: { borderWidth: 1, borderColor: '#ccc', padding: 8, marginVertical: 10, borderRadius: 6 },
-  message: { marginTop: 20, textAlign: 'center' },
+  container: {
+    flex: 1,
+    padding: SPACING,
+    backgroundColor: COLORS.background,
+  },
+  title: {
+    fontSize: FONT_SIZES.title,
+    marginBottom: SPACING / 2,
+    textAlign: 'center',
+    color: COLORS.text,
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    padding: SPACING / 2,
+    marginVertical: SPACING / 2,
+    borderRadius: 6,
+  },
+  message: {
+    marginTop: SPACING,
+    textAlign: 'center',
+    color: COLORS.text,
+  },
 });

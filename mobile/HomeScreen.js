@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, Button } from 'react-native';
+import { View, Text, StyleSheet, Button, ActivityIndicator } from 'react-native';
 import { sessionInfo, logoutUser } from './api';
+import { COLORS, FONT_SIZES, SPACING } from './theme';
 
 const HomeScreen = ({ navigation }) => {
   const [userId, setUserId] = useState(null);
@@ -41,7 +42,7 @@ const HomeScreen = ({ navigation }) => {
           />
         </>
       ) : (
-        <Text style={styles.text}>Loading...</Text>
+        <ActivityIndicator size="large" color={COLORS.primary} />
       )}
     </View>
   );
@@ -54,9 +55,12 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#fff',
+    backgroundColor: COLORS.background,
+    padding: SPACING,
   },
   text: {
-    fontSize: 18,
+    fontSize: FONT_SIZES.text,
+    color: COLORS.text,
+    marginBottom: SPACING,
   },
 });
