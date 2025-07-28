@@ -28,7 +28,7 @@ def issue_virtual_card(user_name, user_email):
             "address": {
                 "line1": "Placeholder Address",
                 "city": "Placeholder City",
-                "region": "Placeholder Reigon",
+                "region": "Placeholder Region",
                 "country": "NZ",
                 "postal_code": "00000"
             }
