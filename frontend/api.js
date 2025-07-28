@@ -47,12 +47,16 @@ export const linkBankAccount = async (userId, bankToken) => {
 };
 
 
-export const makePurchase = async (userId, amount) => {
+export const makePurchase = async (userId, amount, paymentToken) => {
   try {
+    const body = { user_id: userId, amount };
+    if (paymentToken) {
+      body.payment_token = paymentToken;
+    }
     const response = await fetch(`${API_URL}/purchase`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ user_id: userId, amount }),
+      body: JSON.stringify(body),
       credentials: 'include',
     });
     return await response.json();
