@@ -2,9 +2,14 @@
 import os
 
 class Config:
-    SECRET_KEY = os.environ.get("SECRET_KEY") or "your_secret_key_here"
+    """Application configuration loaded from environment variables."""
 
     env = os.getenv("FLASK_ENV", "production")
+
+    SECRET_KEY = os.environ.get("SECRET_KEY") or "your_secret_key_here"
+    if env != "development" and SECRET_KEY == "your_secret_key_here":
+        raise RuntimeError("SECRET_KEY environment variable must be set for production")
+
     if env == "development":
         SQLALCHEMY_DATABASE_URI = os.environ.get("DATABASE_URL", "sqlite:///site.db")
     else:
@@ -26,6 +31,13 @@ class Config:
         'your_stripe_publishable_key_here'
     )
     STRIPE_WEBHOOK_SECRET = os.environ.get('STRIPE_WEBHOOK_SECRET', 'your_stripe_webhook_secret_here')
+
+    if env != "development" and (
+        STRIPE_SECRET_KEY == 'your_stripe_secret_key_here'
+        or STRIPE_PUBLISHABLE_KEY == 'your_stripe_publishable_key_here'
+        or STRIPE_WEBHOOK_SECRET == 'your_stripe_webhook_secret_here'
+    ):
+        raise RuntimeError('Stripe keys must be configured for production')
 
     # Comma-separated list of origins allowed to access the API
     CORS_ORIGINS = os.environ.get('CORS_ORIGINS', '*')
