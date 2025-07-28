@@ -5,7 +5,8 @@ from datetime import datetime, timedelta
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.schedulers.base import STATE_STOPPED
 
-from .models import db, UserProfile, Transaction
+from .models import db, UserProfile, Transaction, SuspiciousMatterReportEntry
+from .aml import SMR_DEADLINE_HOURS
 from . import kyc
 
 scheduler = BackgroundScheduler()
@@ -61,6 +62,20 @@ def alert_flagged_profiles() -> None:
         alert_compliance(f"User {profile.user_id} flagged for review")
 
 
+def check_overdue_smrs() -> None:
+    """Ensure all SMRs are submitted before the deadline."""
+    now = datetime.utcnow()
+    overdue = SuspiciousMatterReportEntry.query.filter(
+        SuspiciousMatterReportEntry.submitted_at.is_(None),
+        SuspiciousMatterReportEntry.required_by < now,
+    ).all()
+    for entry in overdue:
+        alert_compliance(
+            f"SMR for user {entry.user_id} overdue by "
+            f"{(now - entry.required_by).total_seconds() / 3600:.1f}h"
+        )
+
+
 def init_scheduler(app):
     """Start background scheduler with compliance jobs."""
     global _atexit_registered
@@ -68,6 +83,7 @@ def init_scheduler(app):
         scheduler.add_job(review_transaction_patterns, "interval", days=1)
         scheduler.add_job(review_pending_kyc, "interval", hours=24)
         scheduler.add_job(alert_flagged_profiles, "interval", hours=24)
+        scheduler.add_job(check_overdue_smrs, "interval", hours=1)
         scheduler.start()
         if app.config.get("SCHEDULER_SHUTDOWN_AT_EXIT", True) and not _atexit_registered:
             import atexit

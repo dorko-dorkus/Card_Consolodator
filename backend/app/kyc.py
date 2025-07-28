@@ -123,7 +123,10 @@ def send_kyc_request(user: UserProfile, reason: str) -> None:
 
 
 def submit_au_strac_smr(user: UserProfile, reason: str) -> None:
+    from . import aml
+
     log(f"SMR submitted for {user.user_id}: {reason}")
+    aml.report_user_suspicion(user.user_id, reason)
 
 
 def store_kyc_information(user_id: int, info_type: str, info_data: str) -> None:
