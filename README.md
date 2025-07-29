@@ -393,3 +393,7 @@ python export_compliance_records.py --out-dir /tmp/exports
 
 This will generate separate CSV files for each table containing all historical
 records.
+
+## Dependency upgrades
+
+See [docs/frontend-upgrade-plan.md](./docs/frontend-upgrade-plan.md) for the latest recommended Expo and React Native versions and how to update.
