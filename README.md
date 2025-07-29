@@ -162,17 +162,26 @@ cp backend/.env.example backend/.env
 docker run --env-file backend/.env -p 8000:8000 consolidator-backend
 ```
 
-A `docker-compose.yml` file is included to run the backend together with a
-persistent Redis instance used by Flask-Limiter:
+The frontend includes a Dockerfile as well. Build and run it to serve the Expo
+web preview:
+
+```bash
+docker build -t consolidator-frontend ./frontend
+cp frontend/.env.example frontend/.env
+docker run --env-file frontend/.env -p 19006:19006 consolidator-frontend
+```
+
+A `docker-compose.yml` file is included to run the API, Redis and the Expo
+frontend together:
 
 ```bash
 docker compose up --build
 ```
 
-The API will be available at `http://localhost:8000` and Redis data will be
-stored in the `redis-data` volume. When the services are running you can
-verify that `RATELIMIT_STORAGE_URL` and the variables from `.env` were passed
-to the container:
+The API will be available at `http://localhost:8000` and the Expo web interface
+at `http://localhost:19006`. Redis data will be stored in the `redis-data`
+volume. When the services are running you can verify that `RATELIMIT_STORAGE_URL`
+and the variables from `.env` were passed to the container:
 
 ```bash
 docker compose exec backend env | grep RATELIMIT_STORAGE_URL
@@ -181,7 +190,10 @@ docker compose exec backend env | grep RATELIMIT_STORAGE_URL
 Before starting the server, create a `.env` file for your local secrets:
 
 ```bash
+# copy example env files (run these from the repository root)
 cp backend/.env.example backend/.env
+# and for the frontend
+cp frontend/.env.example frontend/.env
 # then edit backend/.env and add your real credentials
 ```
 
