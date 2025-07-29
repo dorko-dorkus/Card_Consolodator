@@ -190,6 +190,7 @@ docker compose exec backend env | grep RATELIMIT_STORAGE_URL
 Before starting the server, create a `.env` file for your local secrets:
 
 ```bash
+# copy example env files (run these from the repository root)
 cp backend/.env.example backend/.env
 # and for the frontend
 cp frontend/.env.example frontend/.env
