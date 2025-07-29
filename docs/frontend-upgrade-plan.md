@@ -47,6 +47,7 @@ Other libraries with updates include:
 
 5. **Update documentation**
    - Document the new versions and any required configuration changes in `README.md`.
-   - Consider adding an upgrade script or notes in `package.json` scripts for future updates.
+   - A convenience `upgrade` script has been added to each React Native project's `package.json`.
+     Run `npm run upgrade` in the `frontend` or `mobile` directories to launch `npx expo upgrade` for future updates.
 
 These upgrades will keep the app on supported versions and ensure access to the latest features and security fixes.

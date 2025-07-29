@@ -2,8 +2,8 @@
 
 This repository contains both the front-end and back-end code for the Consolidator application.
 
-* `frontend/` – an [Expo](https://expo.dev) React Native app.
-* `backend/` – a Flask API server.
+- `frontend/` – an [Expo](https://expo.dev) React Native app.
+- `backend/` – a Flask API server.
 
 Each part can be run and developed independently.
 
@@ -67,6 +67,7 @@ stable secret:
 ```bash
 export TOKENIZER_SECRET=my-secret-value
 ```
+
 If the variable is omitted a random salt is generated for each token.
 
 All payment flows additionally use a small client-side tokenization helper
@@ -220,8 +221,8 @@ with a default limit of `100/hour` per IP. Adjust this by setting the
 
 Your `DATABASE_URL` should use a standard SQLAlchemy connection string. For example:
 
-* **Postgres**: `postgresql://user:password@hostname:5432/dbname`
-* **MySQL**: `mysql+pymysql://user:password@hostname:3306/dbname`
+- **Postgres**: `postgresql://user:password@hostname:5432/dbname`
+- **MySQL**: `mysql+pymysql://user:password@hostname:3306/dbname`
 
 ## Database migrations
 
@@ -273,7 +274,7 @@ Join our community of developers creating universal apps.
 ## Deployment
 
 Create a `backend/.env` file before running the API in production. Copy the
-example file and replace each placeholder with your real credentials.  The
+example file and replace each placeholder with your real credentials. The
 application uses PostgreSQL in production, so set `DATABASE_URL` to the
 connection string for your Postgres instance (for example
 `postgresql://user:password@localhost:5432/consolidator`):
@@ -337,7 +338,6 @@ server {
 This keeps Gunicorn behind the reverse proxy while still serving the API on
 port 80.
 
-
 ## Windows installer
 
 A helper script is provided to build an executable version of the backend and install all dependencies. Run the following commands in a Windows command prompt:
@@ -397,3 +397,4 @@ records.
 ## Dependency upgrades
 
 See [docs/frontend-upgrade-plan.md](./docs/frontend-upgrade-plan.md) for the latest recommended Expo and React Native versions and how to update.
+Both React Native directories include an `upgrade` npm script. Run `npm run upgrade` within `frontend` or `mobile` to initiate `npx expo upgrade`.
