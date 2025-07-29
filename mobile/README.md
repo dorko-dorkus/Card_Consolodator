@@ -18,7 +18,7 @@ Use the on-screen options to run the app on a simulator, physical device or in t
 ## Login feature
 
 The app now starts on a **Login** screen. Provide your registered email and
-password and press **Login**.  On success you will be taken to the home screen
+password and press **Login**. On success you will be taken to the home screen
 which fetches session information from the backend.
 
 From the home screen you can navigate to additional flows:
