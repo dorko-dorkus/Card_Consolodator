@@ -397,5 +397,5 @@ records.
 ## Dependency upgrades
 
 See [docs/frontend-upgrade-plan.md](./docs/frontend-upgrade-plan.md) for the latest recommended Expo and React Native versions and how to update.
-Both React Native directories include an `upgrade` npm script. Run `npm run upgrade` within `frontend` or `mobile` to initiate `npx expo upgrade`.
+Both React Native directories include an `upgrade` npm script. Run `npm run upgrade` within `frontend` or `mobile` to refresh dependencies using `npm update`.
 The apps currently target **Expo 53**, **React Native 0.80**, and **React 19.1.1** after the most recent upgrade.
