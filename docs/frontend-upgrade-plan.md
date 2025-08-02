@@ -30,7 +30,7 @@ Other libraries with updates include:
 
 1. **Prepare for Expo 53**
    - Review the [Expo SDK 53 release notes](https://blog.expo.dev/expo-sdk-53-is-now-available-d176053dc842) for breaking changes.
-   - Update `expo` and related packages via `npx expo upgrade`.
+   - Update `expo` and related packages by editing `package.json` and running `npm install` as the `expo upgrade` command has been deprecated.
    - Ensure the `eas-cli` version is up to date if you use EAS build.
 
 2. **Upgrade React Native**
@@ -48,6 +48,6 @@ Other libraries with updates include:
 5. **Update documentation**
    - Document the new versions and any required configuration changes in `README.md`.
    - A convenience `upgrade` script has been added to each React Native project's `package.json`.
-     Run `npm run upgrade` in the `frontend` or `mobile` directories to launch `npx expo upgrade` for future updates.
+     Run `npm run upgrade` in the `frontend` or `mobile` directories to refresh dependencies with `npm update` for future updates.
 
 These upgrades will keep the app on supported versions and ensure access to the latest features and security fixes.
