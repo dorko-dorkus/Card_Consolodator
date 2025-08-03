@@ -19,6 +19,11 @@
           "file": "backend/app/routes.py",
           "snippet": "card_token = data.get(\"card_token\")",
           "comment": "Backend expects a token, not raw card details."
+        },
+        {
+          "file": "mobile/PurchaseScreen.js",
+          "snippet": "const [paymentToken, setPaymentToken]",
+          "comment": "Mobile client submits payment tokens instead of card numbers."
         }
       ]
     },
@@ -27,17 +32,17 @@
       "name": "No Stored-Value or Top-Up",
       "status": "passed",
       "details": [
-          {
-            "file": "backend/migrations/versions/0004_remove_balance_fields.py",
-            "snippet": "batch.drop_column('balance')",
-            "comment": "Migration removed stored balance fields."
-          },
-          {
-            "file": "compliance/README.md",
-            "snippet": "removed card storage and balance top-up capabilities",
-            "comment": "Documentation confirms removal of stored-value features."
-          }
-        ]
+        {
+          "file": "backend/migrations/versions/0004_remove_balance_fields.py",
+          "snippet": "batch.drop_column('balance')",
+          "comment": "Migration removed stored balance fields."
+        },
+        {
+          "file": "compliance/README.md",
+          "snippet": "removed card storage and balance top-up capabilities",
+          "comment": "Documentation confirms removal of stored-value features."
+        }
+      ]
     },
     {
       "id": 3,
@@ -58,7 +63,7 @@
       "details": [
         {
           "file": "backend/app/models.py",
-          "snippet": "Transaction ... amount"
+          "snippet": "Transaction ... amount",
           "comment": "Transaction amounts are persisted for AML monitoring; no card balances are stored."
         }
       ]
@@ -94,6 +99,18 @@
           "file": "compliance/Attestation_of_Compliance.pdf",
           "snippet": "Attestation of Compliance 2024",
           "comment": "Current attestation document is stored under version control."
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "name": "Compliance Record Export",
+      "status": "passed",
+      "details": [
+        {
+          "file": "backend/app/export_compliance_records.py",
+          "snippet": "def export_table(session, model, path):",
+          "comment": "Script exports compliance data to CSV for audits."
         }
       ]
     }
