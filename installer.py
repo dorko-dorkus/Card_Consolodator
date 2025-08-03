@@ -9,6 +9,14 @@ BACKEND_DIR = os.path.join(ROOT, "backend")
 FRONTEND_DIR = os.path.join(ROOT, "frontend")
 
 
+def clean_npm_proxy():
+    """Remove proxy-related settings to avoid npm warnings."""
+    for key in ["HTTP_PROXY", "HTTPS_PROXY", "http_proxy", "https_proxy"]:
+        os.environ.pop(key, None)
+    subprocess.run(["npm", "config", "delete", "proxy"], check=False)
+    subprocess.run(["npm", "config", "delete", "https-proxy"], check=False)
+
+
 def ensure_backend_env():
     """Ensure backend/.env exists; copy from example if missing."""
     env_file = os.path.join(BACKEND_DIR, ".env")
@@ -47,9 +55,7 @@ def prompt_missing_env(env_file, example_file):
     updated = False
     for key, val in env.items():
         placeholder = (
-            not val
-            or val.upper().startswith("REPLACE_WITH")
-            or "CHANGE_ME" in val
+            not val or val.upper().startswith("REPLACE_WITH") or "CHANGE_ME" in val
         )
         if placeholder:
             user_val = input(f"Enter value for {key}: ").strip()
@@ -87,6 +93,7 @@ def main():
     env_file, example_file = ensure_backend_env()
     prompt_missing_env(env_file, example_file)
     install_backend()
+    clean_npm_proxy()
     install_frontend()
     print("Build complete. Backend executable is located in backend/dist/.")
 

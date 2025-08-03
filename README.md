@@ -7,6 +7,18 @@ This repository contains both the front-end and back-end code for the Consolidat
 
 Each part can be run and developed independently.
 
+## Prerequisites
+
+- Node.js v22.17.1. Use `nvm` or your package manager to ensure this version is active.
+- If npm warns about unknown `http-proxy`/`https-proxy` settings, clear them with:
+
+  ```bash
+  npm config delete proxy
+  npm config delete https-proxy
+  ```
+
+  or unset the `HTTP_PROXY`/`HTTPS_PROXY` environment variables.
+
 ## Get started (frontend)
 
 1. Install dependencies
