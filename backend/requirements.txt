@@ -12,7 +12,7 @@ pytest-mock==3.14.1
 Flask-Migrate==4.1.0
 alembic==1.16.4
 flask-limiter==3.12
-requests==2.32.4
+requests==2.32.5
 APScheduler==3.11.0
 
 setuptools==80.9.0
