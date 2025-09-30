@@ -16,7 +16,7 @@
     "@react-navigation/native-stack": "^7.3.24",
     "@stripe/stripe-react-native": "0.38.6",
     "axios": "^1.11.0",
-    "expo": "~52.0.47",
+    "expo": "~54.0.10",
     "expo-router": "~4.0.21",
     "expo-secure-store": "~14.0.1",
     "expo-splash-screen": "~0.30.10",
