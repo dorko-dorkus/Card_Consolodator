@@ -6,7 +6,7 @@ Flask-WTF==1.2.2
 flask-cors==6.0.1
 python-dotenv==1.1.1
 cryptography==45.0.5
-stripe==12.3.0
+stripe==13.0.1
 pytest==8.4.1
 pytest-mock==3.14.1
 Flask-Migrate==4.1.0
