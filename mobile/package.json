@@ -12,7 +12,7 @@
     "upgrade": "npm update"
   },
   "dependencies": {
-    "expo": "~52.0.47",
+    "expo": "~54.0.20",
     "react": "18.3.1",
     "react-native": "0.76.9",
     "@react-navigation/native": "^7.1.17",
